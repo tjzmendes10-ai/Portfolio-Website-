@@ -156,9 +156,8 @@ The values belong only in GitHub's encrypted secret fields. Do not put them in t
 The AWS identity needs permission to list/upload the portfolio bucket, list/discover the existing CloudFront
 distribution, create invalidations and read their status. The supplied keys were verified against the expected account.
 
-As of 29 October 2026, these GitHub secrets still need to be added: browser automation stopped before saving them
-because it could not verify the active browser URL. Repository push access is working; secret creation was not completed.
-Once the secrets are saved, push to `main` or open [Actions](https://github.com/tjzmendes10-ai/Portfolio-Website-/actions)
+Both repository secrets were configured on 29 October 2026 using GitHub's encrypted secret forms.
+Push to `main` to deploy, or open [Actions](https://github.com/tjzmendes10-ai/Portfolio-Website-/actions)
 and run **Deploy portfolio** on `main`.
 
 ### Optional migration to temporary credentials (OIDC)
