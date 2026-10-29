@@ -1,0 +1,327 @@
+/* A quiet, shared geographic layer. All motion is owned by one visibility-aware loop. */
+body {
+  isolation: isolate;
+  background: #081b17;
+}
+.anz-background {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+.anz-background::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #081b1760, transparent 55%, #081b1710);
+}
+.anz-map-stage {
+  position: absolute;
+  width: min(1130px, 84vw);
+  aspect-ratio: 1000 / 680;
+  left: 61%;
+  top: 49%;
+  transform: translate(-50%, -50%);
+}
+.anz-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  color: #34d399;
+}
+.anz-outline,
+.anz-cursor-outline {
+  fill: none;
+  stroke: #34d399;
+  stroke-width: 0.85;
+}
+.anz-outline {
+  stroke-opacity: var(--outline-opacity, 0.11);
+}
+.anz-cursor-outline {
+  stroke-opacity: 0.26;
+  stroke-width: 1.05;
+}
+.anz-route,
+.anz-route-glow {
+  stroke: #34d399;
+  stroke-linecap: round;
+}
+.anz-route {
+  stroke-width: 0.8;
+}
+.anz-route-glow {
+  stroke-width: 4;
+}
+.anz-city-core,
+.anz-city-aura,
+.anz-packet {
+  fill: #34d399;
+}
+.anz-city-ring {
+  fill: none;
+  stroke: #34d399;
+  stroke-opacity: 0.22;
+  stroke-width: 0.6;
+  vector-effect: non-scaling-stroke;
+}
+.anz-sydney-label {
+  fill: #81bba2;
+  font-family: "DM Sans", sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.045em;
+}
+.cursor-halo {
+  z-index: -1;
+  background: radial-gradient(
+    circle,
+    #34d39909,
+    #34d39903 38%,
+    transparent 68%
+  );
+  mix-blend-mode: normal;
+}
+.site-header {
+  background: #081b1766;
+  border-color: #99c9ac16;
+}
+.hero {
+  min-height: 780px;
+  padding-top: 86px;
+  gap: 3%;
+}
+.hero-copy {
+  padding-bottom: 85px;
+}
+.hero .eyebrow {
+  color: #8eb9a1;
+}
+.hero-description {
+  color: #9ab2a5;
+}
+.hero-map-window {
+  position: relative;
+  min-height: 460px;
+  margin: 0 0 70px;
+  display: flex;
+  align-items: end;
+  justify-content: end;
+}
+.hero-map-note {
+  padding: 0 4px 17px 0;
+  text-align: right;
+}
+.hero-map-note .eyebrow {
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  color: #739d86;
+  display: block;
+  margin-bottom: 10px;
+}
+.hero-map-note p {
+  color: #a9c5b3;
+  font-size: 12px;
+  line-height: 1.8;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.hero-bottom {
+  border-color: #99c9ac1e;
+}
+.section-padding {
+  padding-block: 105px;
+}
+.results-section,
+.about-section,
+.ask-section {
+  background: linear-gradient(90deg, #081b17db, #081b179e 60%, #081b1766);
+}
+.numbers-strip {
+  border-color: #a9d1b522;
+}
+.case-study {
+  background: #10271fde;
+  border-color: #b1d7bd26;
+}
+.case-featured {
+  background: linear-gradient(135deg, #183d2ce6, #10291fdb);
+}
+.case-wide {
+  background: #0d2119a3;
+}
+.case-index,
+.case-footer {
+  color: #82a88f;
+}
+.experience-section {
+  background: linear-gradient(90deg, #081b17bf, #081b1755);
+}
+.approach-section {
+  background: linear-gradient(100deg, #102a20e6, #0a2017a3);
+  color: var(--text);
+  border-block: 1px solid #a9d1b51a;
+}
+.approach-section::before {
+  display: none;
+}
+.approach-section .eyebrow {
+  color: #80ab90;
+}
+.approach-section h2 span {
+  color: #b5dac1;
+}
+.approach-intro > p:not(.eyebrow),
+.approach-steps p {
+  color: #9cb5a5;
+}
+.approach-section .text-link,
+.approach-section .text-link span {
+  color: #c0dfc9;
+  border-color: #689b795e;
+}
+.approach-steps article {
+  border-color: #a9d1b52b;
+}
+.step-number,
+.step-symbol {
+  color: #73a889;
+}
+.van-card {
+  background: linear-gradient(135deg, #163c2bd9, #10291fe6);
+  border-color: #51836466;
+}
+.site-footer {
+  position: relative;
+  background: linear-gradient(105deg, #102b21e6, #0c241ab3);
+  border-color: #a9d1b52b;
+}
+.anz-footer-line {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #9ec4ae !important;
+}
+.anz-footer-line .status-dot {
+  width: 5px;
+  height: 5px;
+  background: #34d399;
+  box-shadow: none;
+}
+.is-network-complete .anz-footer-line {
+  color: #bceacb !important;
+}
+.is-network-complete .anz-footer-line .status-dot {
+  box-shadow: 0 0 12px #34d39944;
+}
+.contact-arrow {
+  background: #b2d9bf;
+}
+.contact-arrow:hover {
+  background: #c7e6cf;
+}
+
+@media (min-width: 1600px) {
+  .hero {
+    min-height: 840px;
+  }
+  .hero-map-window {
+    min-height: 500px;
+  }
+}
+@media (max-width: 1100px) {
+  .hero {
+    min-height: 720px;
+    gap: 1%;
+  }
+  .hero-map-window {
+    min-height: 420px;
+  }
+}
+@media (max-width: 850px) {
+  .hero {
+    min-height: 670px;
+    padding-top: 66px;
+  }
+  .hero-copy {
+    padding-bottom: 60px;
+  }
+  .hero-map-window {
+    min-height: 370px;
+    margin-bottom: 65px;
+  }
+  .hero-map-note .eyebrow {
+    font-size: 7px;
+    letter-spacing: 0.1em;
+  }
+  .hero-map-note p {
+    font-size: 10px;
+  }
+  .section-padding {
+    padding-block: 82px;
+  }
+}
+@media (max-width: 700px) {
+  .anz-map-stage {
+    width: 104vw;
+    left: 50%;
+    top: 45%;
+  }
+  .anz-background::after {
+    background: linear-gradient(180deg, #081b171a, #081b1740);
+  }
+  .anz-route-glow,
+  .anz-cursor-outline {
+    display: none;
+  }
+  .anz-sydney-label {
+    font-size: 11px;
+  }
+  .results-section,
+  .about-section,
+  .ask-section {
+    background: #081b17b3;
+  }
+  .experience-section {
+    background: #081b1794;
+  }
+  .approach-section {
+    background: #0d281bb3;
+  }
+}
+@media (max-width: 600px) {
+  .hero {
+    min-height: auto;
+    padding-top: 52px;
+  }
+  .hero-copy {
+    padding-bottom: 0;
+  }
+  .hero-map-window {
+    min-height: 245px;
+    margin: 0;
+    width: 100%;
+    justify-content: end;
+  }
+  .hero-map-note {
+    padding-bottom: 25px;
+  }
+  .hero-map-note .eyebrow {
+    font-size: 7px;
+  }
+  .hero-map-note p {
+    font-size: 10px;
+  }
+  .section-padding {
+    padding-block: 64px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .anz-packet,
+  .anz-cursor-outline,
+  .cursor-halo {
+    display: none;
+  }
+}

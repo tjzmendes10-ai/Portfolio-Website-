@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.deploy/
+# Local deployment state, downloaded source data and preview captures stay off GitHub.
+.playwright-mcp/
+.openai/
+.codex/
+.env
+.env.*
+!.env.example
+.aws/
+credentials
+*.pem
+*.key
+*.log
+.DS_Store
+Thumbs.db

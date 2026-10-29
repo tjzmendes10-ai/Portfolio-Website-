@@ -1,0 +1,61 @@
+{
+  "width": 1000,
+  "height": 680,
+  "cities": [
+    {
+      "id": "sydney",
+      "name": "Sydney",
+      "x": 576.7,
+      "y": 397.3
+    },
+    {
+      "id": "melbourne",
+      "name": "Melbourne",
+      "x": 489.53,
+      "y": 465.35
+    },
+    {
+      "id": "brisbane",
+      "name": "Brisbane",
+      "x": 602.14,
+      "y": 292.96
+    },
+    {
+      "id": "auckland",
+      "name": "Auckland",
+      "x": 905.72,
+      "y": 448.3
+    },
+    {
+      "id": "perth",
+      "name": "Perth",
+      "x": 82.49,
+      "y": 365.37
+    },
+    {
+      "id": "adelaide",
+      "name": "Adelaide",
+      "x": 400.47,
+      "y": 415.28
+    },
+    {
+      "id": "canberra",
+      "name": "Canberra",
+      "x": 547.6,
+      "y": 421.25
+    },
+    {
+      "id": "wellington",
+      "name": "Wellington",
+      "x": 905.92,
+      "y": 528.32
+    }
+  ],
+  "source": {
+    "commit": "ca96624a56bd078437bca8184e78163e5039ad19",
+    "countries": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_50m_admin_0_countries.geojson",
+    "places": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_50m_populated_places_simple.geojson",
+    "licence": "Public domain",
+    "terms": "https://www.naturalearthdata.com/about/terms-of-use/"
+  }
+}

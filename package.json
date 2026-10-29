@@ -1,0 +1,20 @@
+{
+  "name": "thomas-mendes-portfolio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.12" },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5174 --strictPort",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "check": "node --check scripts/aws.mjs && node --check scripts/deploy.mjs && node --check scripts/github.mjs && node --check infra/site.mjs && node --check src/main.js && node --check src/anz-background.js && node --check src/portfolio-interactions.js && node --check scripts/generate-anz-map.mjs",
+    "map:generate": "node scripts/generate-anz-map.mjs",
+    "deploy:plan": "node scripts/deploy.mjs --plan",
+    "deploy": "npm run build && node scripts/deploy.mjs",
+    "deploy:content": "node scripts/deploy.mjs --content-only",
+    "deploy:github": "node scripts/deploy.mjs --github",
+    "deploy:status": "node scripts/deploy.mjs --status"
+  },
+  "devDependencies": { "vite": "^8.3.5" }
+}

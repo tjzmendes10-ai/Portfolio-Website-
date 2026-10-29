@@ -1,0 +1,14 @@
+{
+  "projectName": "thomas-mendes-portfolio",
+  "region": "ap-southeast-2",
+  "certificateRegion": "us-east-1",
+  "expectedAccountId": "127228002828",
+  "domainName": "thomas-mendes.com",
+  "hostedZoneId": "Z0246504ITE2X3AQQ6LH",
+  "includeWww": true,
+  "githubRepository": "tjzmendes10-ai/Portfolio-Website-",
+  "githubOwnerId": "349605649",
+  "githubRepositoryId": "1438305451",
+  "githubBranch": "main",
+  "githubOidcProviderArn": ""
+}
