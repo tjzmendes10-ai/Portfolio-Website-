@@ -6,6 +6,9 @@ import {
   siPerplexity,
   siV0,
 } from "simple-icons";
+import openaiSvg from "./assets/logos/openai-blossom-black.svg?raw";
+import lovableSvg from "./assets/logos/lovable-logomark-black.svg?raw";
+import awsLogo from "./assets/logos/aws-logo.png";
 
 const icons = {
   siClaude,
@@ -15,29 +18,77 @@ const icons = {
   siPerplexity,
   siV0,
 };
+// Press-kit SVGs, used as supplied: only the fill is swapped for currentColor.
+const pressSvgs = { openai: openaiSvg, lovable: lovableSvg };
+// Press-kit PNG on a transparent background, tinted through a CSS mask.
+const pressImages = { aws: awsLogo };
 const svgNs = "http://www.w3.org/2000/svg";
 
-// Official simple-icons paths, filled with currentColor so CSS sets the tint.
-// Tools without a data-icon keep their text and become text tags.
+function label(svg, name) {
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", name);
+  const title = document.createElementNS(svgNs, "title");
+  title.textContent = name;
+  svg.append(title);
+}
+
+function simpleIcon(icon, name) {
+  const svg = document.createElementNS(svgNs, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  label(svg, name);
+  const path = document.createElementNS(svgNs, "path");
+  path.setAttribute("d", icon.path);
+  path.setAttribute("fill", "currentColor");
+  svg.append(path);
+  return svg;
+}
+
+function pressSvg(markup, name) {
+  const source = new DOMParser().parseFromString(markup, "image/svg+xml");
+  const svg = document.createElementNS(svgNs, "svg");
+  label(svg, name);
+  const group = document.createElementNS(svgNs, "g");
+  source.querySelectorAll("path").forEach((original) => {
+    const path = document.createElementNS(svgNs, "path");
+    path.setAttribute("d", original.getAttribute("d"));
+    ["fill-rule", "clip-rule"].forEach((attr) => {
+      if (original.hasAttribute(attr))
+        path.setAttribute(attr, original.getAttribute(attr));
+    });
+    path.setAttribute("fill", "currentColor");
+    group.append(path);
+  });
+  svg.append(group);
+  return { svg, group };
+}
+
+function pressImage(src, name) {
+  const mark = document.createElement("span");
+  mark.className = "ai-mask";
+  mark.setAttribute("role", "img");
+  mark.setAttribute("aria-label", name);
+  mark.title = name;
+  mark.style.setProperty("--ai-mask", `url("${src}")`);
+  return mark;
+}
+
+// Tools without a logo keep their text and become text tags.
 export function initAiTools() {
   document.querySelectorAll(".ai-tool").forEach((item) => {
-    const name = item.dataset.name;
-    const icon = icons[item.dataset.icon];
-    if (!icon) {
+    const { name, icon, press } = item.dataset;
+    if (icon in icons) {
+      item.replaceChildren(simpleIcon(icons[icon], name));
+    } else if (press in pressSvgs) {
+      const { svg, group } = pressSvg(pressSvgs[press], name);
+      item.replaceChildren(svg);
+      // Trim the artboard padding so the mark fills its 22px height.
+      const { x, y, width, height } = group.getBBox();
+      svg.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
+    } else if (press in pressImages) {
+      item.replaceChildren(pressImage(pressImages[press], name));
+    } else {
       item.classList.add("is-text");
       item.title = name;
-      return;
     }
-    const svg = document.createElementNS(svgNs, "svg");
-    svg.setAttribute("viewBox", "0 0 24 24");
-    svg.setAttribute("role", "img");
-    svg.setAttribute("aria-label", name);
-    const title = document.createElementNS(svgNs, "title");
-    title.textContent = name;
-    const path = document.createElementNS(svgNs, "path");
-    path.setAttribute("d", icon.path);
-    path.setAttribute("fill", "currentColor");
-    svg.append(title, path);
-    item.replaceChildren(svg);
   });
 }

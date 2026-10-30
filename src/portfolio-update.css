@@ -207,6 +207,14 @@
   width: auto;
   height: 22px;
 }
+.ai-mask {
+  display: block;
+  height: 22px;
+  aspect-ratio: 1254 / 750;
+  background: currentColor;
+  -webkit-mask: var(--ai-mask) center / contain no-repeat;
+  mask: var(--ai-mask) center / contain no-repeat;
+}
 .ai-tool.is-text {
   padding: 0 9px;
   border: 1px solid currentColor;
@@ -448,7 +456,8 @@
     gap: 14px 22px;
   }
   .ai-tool,
-  .ai-tool svg {
+  .ai-tool svg,
+  .ai-mask {
     height: 20px;
   }
   .tom-chat-log {
