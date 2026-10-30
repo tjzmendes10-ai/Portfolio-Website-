@@ -51,6 +51,18 @@
       "y": 528.32
     },
     {
+      "id": "christchurch",
+      "name": "Christchurch",
+      "x": 875.92,
+      "y": 570.77
+    },
+    {
+      "id": "queenstown",
+      "name": "Queenstown",
+      "x": 820.5,
+      "y": 599.97
+    },
+    {
       "id": "gold-coast",
       "name": "Gold Coast",
       "x": 607.94,
@@ -82,12 +94,6 @@
       "name": "Darwin",
       "x": 292.22,
       "y": 68.81
-    },
-    {
-      "id": "christchurch",
-      "name": "Christchurch",
-      "x": 875.92,
-      "y": 570.77
     }
   ],
   "source": {

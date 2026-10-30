@@ -142,17 +142,21 @@ const cityOrder = [
   "Adelaide",
   "Canberra",
   "Wellington",
+  "Christchurch",
+  "Queenstown",
   "Gold Coast",
   "Newcastle",
   "Wollongong",
   "Hobart",
   "Darwin",
-  "Christchurch",
 ];
 // Satellite cities sit close to a larger neighbour, so their markers are drawn smaller.
 const minorCities = new Set(["Gold Coast", "Newcastle", "Wollongong"]);
-// Natural Earth 1:50m has no Wollongong, so it uses its published coordinates instead.
-const supplemental = { Wollongong: [150.8931, -34.4278] };
+// Natural Earth 1:50m has no Wollongong or Queenstown, so they use their published coordinates.
+const supplemental = {
+  Wollongong: [150.8931, -34.4278],
+  Queenstown: [168.6626, -45.0312],
+};
 const cities = cityOrder.map((name) => {
   const feature = places.features.find(
     (place) =>
