@@ -39,10 +39,10 @@ body {
   stroke-width: 0.85;
 }
 .anz-outline {
-  stroke-opacity: var(--outline-opacity, 0.11);
+  stroke-opacity: var(--outline-opacity, 0.27);
 }
 .anz-cursor-outline {
-  stroke-opacity: 0.26;
+  stroke-opacity: 0.4;
   stroke-width: 1.05;
 }
 .anz-route,
@@ -51,7 +51,7 @@ body {
   stroke-linecap: round;
 }
 .anz-route {
-  stroke-width: 0.8;
+  stroke-width: 0.9;
 }
 .anz-route-glow {
   stroke-width: 4;
@@ -64,12 +64,12 @@ body {
 .anz-city-ring {
   fill: none;
   stroke: #34d399;
-  stroke-opacity: 0.22;
+  stroke-opacity: 0.5;
   stroke-width: 0.6;
   vector-effect: non-scaling-stroke;
 }
 .anz-sydney-label {
-  fill: #81bba2;
+  fill: #9fd3b9;
   font-family: "DM Sans", sans-serif;
   font-size: 9px;
   letter-spacing: 0.045em;
@@ -137,7 +137,7 @@ body {
 .results-section,
 .about-section,
 .ask-section {
-  background: linear-gradient(90deg, #081b17db, #081b179e 60%, #081b1766);
+  background: linear-gradient(90deg, #081b17c2, #081b1782 60%, #081b1750);
 }
 .numbers-strip {
   border-color: #a9d1b522;
@@ -157,7 +157,7 @@ body {
   color: #82a88f;
 }
 .experience-section {
-  background: linear-gradient(90deg, #081b17bf, #081b1755);
+  background: linear-gradient(90deg, #081b17a6, #081b1744);
 }
 .approach-section {
   background: linear-gradient(100deg, #102a20e6, #0a2017a3);
@@ -282,7 +282,7 @@ body {
   .results-section,
   .about-section,
   .ask-section {
-    background: #081b17b3;
+    background: #081b1799;
   }
   .experience-section {
     background: #081b1794;

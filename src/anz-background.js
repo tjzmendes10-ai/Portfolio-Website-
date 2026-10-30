@@ -26,7 +26,10 @@ export function initAnzBackground() {
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const compact = window.matchMedia("(max-width: 700px), (pointer: coarse)");
   const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-  const thresholds = [0.24, 0.34, 0.44, 0.54, 0.64, 0.74, 0.84, 0.92];
+  // Cities arrive evenly between 20% and 66% of the page scroll, so the finished network is on screen well before the footer.
+  const thresholds = map.cities.map(
+    (_, index) => 0.2 + (index * 0.46) / (map.cities.length - 1),
+  );
 
   const gradient = element("radialGradient", { id: "anz-cursor-gradient" });
   gradient.append(
@@ -63,20 +66,36 @@ export function initAnzBackground() {
 
   // Each arriving city connects to one or two earlier cities. These are an aspirational motif, not past-work locations.
   const connections = [
-    [1, 0],
-    [2, 0],
-    [2, 1],
-    [3, 0],
-    [3, 2],
-    [4, 1],
-    [4, 0],
-    [5, 1],
-    [5, 4],
-    [6, 0],
-    [6, 1],
-    [7, 3],
-    [7, 0],
-  ];
+    ["melbourne", "sydney"],
+    ["brisbane", "sydney"],
+    ["brisbane", "melbourne"],
+    ["auckland", "sydney"],
+    ["auckland", "brisbane"],
+    ["perth", "melbourne"],
+    ["perth", "sydney"],
+    ["adelaide", "melbourne"],
+    ["adelaide", "perth"],
+    ["canberra", "sydney"],
+    ["canberra", "melbourne"],
+    ["wellington", "auckland"],
+    ["wellington", "sydney"],
+    ["christchurch", "wellington"],
+    ["christchurch", "auckland"],
+    ["queenstown", "christchurch"],
+    ["queenstown", "wellington"],
+    ["gold-coast", "sydney"],
+    ["gold-coast", "auckland"],
+    ["newcastle", "sydney"],
+    ["newcastle", "brisbane"],
+    ["wollongong", "canberra"],
+    ["wollongong", "melbourne"],
+    ["hobart", "melbourne"],
+    ["hobart", "sydney"],
+    ["darwin", "perth"],
+    ["darwin", "brisbane"],
+  ].map((pair) =>
+    pair.map((id) => map.cities.findIndex((city) => city.id === id)),
+  );
   const routes = connections.map(([to, from], index) => {
     const secondary = index > 0 && connections[index - 1][0] === to;
     const group = element("g", {
@@ -84,9 +103,6 @@ export function initAnzBackground() {
     });
     const attributes = {
       fill: "none",
-      pathLength: 1,
-      "stroke-dasharray": 1,
-      "stroke-dashoffset": 1,
       "vector-effect": "non-scaling-stroke",
     };
     const glow = element("path", { ...attributes, class: "anz-route-glow" });
@@ -128,7 +144,7 @@ export function initAnzBackground() {
     const core = element("circle", {
       cx: city.x,
       cy: city.y,
-      r: city.id === "sydney" ? 2.4 : 1.9,
+      r: city.minor ? 1.4 : city.id === "sydney" ? 2.4 : 1.9,
       class: "anz-city-core",
     });
     group.append(aura, ring, core);
@@ -146,9 +162,12 @@ export function initAnzBackground() {
     return { ...city, group, aura, ring, label, index };
   });
 
-  const ambientPoints = Array.from({ length: 30 }, (_, index) => {
+  // The first points turn into the cities (hidden here), the rest stay as drifting ambient dots.
+  const ambientCount = map.cities.length + 22;
+  const compactLimit = map.cities.length + 10;
+  const ambientPoints = Array.from({ length: ambientCount }, (_, index) => {
     const angle = index * 2.399963;
-    const radius = 0.32 + Math.sqrt((index + 1) / 30) * 0.68;
+    const radius = 0.32 + Math.sqrt((index + 1) / ambientCount) * 0.68;
     const point = {
       x: 700 + Math.cos(angle) * 220 * radius,
       y: 300 + Math.sin(angle) * 205 * radius,
@@ -210,7 +229,7 @@ export function initAnzBackground() {
       pointer.active && finePointer.matches && !still && !small;
     svg.style.setProperty(
       "--outline-opacity",
-      ((0.11 + value * 0.045) * morph).toFixed(3),
+      ((0.27 + value * 0.1) * morph).toFixed(3),
     );
     cursorOutline.style.opacity = morph;
     svg.classList.toggle("is-compact", small);
@@ -229,14 +248,16 @@ export function initAnzBackground() {
           point.node.setAttribute("cy", y.toFixed(2));
           point.node.setAttribute(
             "opacity",
-            index < 8 || (small && index >= 18) ? 0 : 0.45,
+            index < map.cities.length || (small && index >= compactLimit)
+              ? 0
+              : 0.6,
           );
           return { x, y };
         })
       : map.cities;
     if (showAmbient)
       ambientEdges.forEach(({ from, to, line }) => {
-        if (small && (from >= 18 || to >= 18)) {
+        if (small && (from >= compactLimit || to >= compactLimit)) {
           line.style.display = "none";
           return;
         }
@@ -258,7 +279,7 @@ export function initAnzBackground() {
           "d",
           `M${start.x.toFixed(2)},${start.y.toFixed(2)} L${end.x.toFixed(2)},${end.y.toFixed(2)}`,
         );
-        line.setAttribute("opacity", (0.14 + nearby * 0.22).toFixed(3));
+        line.setAttribute("opacity", (0.28 + nearby * 0.26).toFixed(3));
       });
 
     cities.forEach((city) => {
@@ -273,18 +294,19 @@ export function initAnzBackground() {
       city.group.setAttribute(
         "opacity",
         Math.min(
-          0.67,
-          activation * (small ? 0.56 : 0.67) +
-            ambientOpacity * (1 - morph) * 0.38,
+          0.95,
+          activation * (small ? 0.8 : 0.95) +
+            ambientOpacity * (1 - morph) * 0.5,
         ).toFixed(3),
       );
       // Keep the geographic core fixed; only the aura breathes gently around it.
       const breath = still
         ? 0.5
         : 0.5 + Math.sin(time * 0.00065 + city.index * 1.2) * 0.5;
-      city.aura.setAttribute("r", (8 + breath * 3).toFixed(2));
-      city.aura.setAttribute("opacity", (0.055 + breath * 0.045).toFixed(3));
-      city.ring.setAttribute("r", (4.2 + breath * 1.1).toFixed(2));
+      const size = city.minor ? 0.6 : 1;
+      city.aura.setAttribute("r", ((8 + breath * 3) * size).toFixed(2));
+      city.aura.setAttribute("opacity", (0.11 + breath * 0.08).toFixed(3));
+      city.ring.setAttribute("r", ((4.2 + breath * 1.1) * size).toFixed(2));
     });
 
     routes.forEach((route) => {
@@ -312,25 +334,34 @@ export function initAnzBackground() {
       const bow = Math.min(42, distance * 0.13) * direction + sway;
       const controlX = (from.x + to.x) / 2 - (dy / distance) * bow;
       const controlY = (from.y + to.y) / 2 + (dx / distance) * bow;
-      const d = `M${from.x},${from.y} Q${controlX.toFixed(2)},${controlY.toFixed(2)} ${to.x},${to.y}`;
-      [route.line, route.glow].forEach((path) => {
-        path.setAttribute("d", d);
-        path.setAttribute("stroke-dashoffset", (1 - amount).toFixed(4));
-      });
+      // Draw the curve from its start up to `amount`, so it always starts and ends exactly on a city.
+      const keep = 1 - amount;
+      const endX =
+        keep * keep * from.x +
+        2 * keep * amount * controlX +
+        amount * amount * to.x;
+      const endY =
+        keep * keep * from.y +
+        2 * keep * amount * controlY +
+        amount * amount * to.y;
+      const partialX = from.x + (controlX - from.x) * amount;
+      const partialY = from.y + (controlY - from.y) * amount;
+      const d = `M${from.x},${from.y} Q${partialX.toFixed(2)},${partialY.toFixed(2)} ${endX.toFixed(2)},${endY.toFixed(2)}`;
+      [route.line, route.glow].forEach((path) => path.setAttribute("d", d));
       route.line.setAttribute(
         "opacity",
         (
           amount *
-          ((small ? 0.16 : 0.22) +
+          ((small ? 0.42 : 0.55) +
             (interactive
               ? Math.max(
                   0,
                   1 - Math.hypot(controlX - mouseX, controlY - mouseY) / 180,
-                ) * 0.17
+                ) * 0.25
               : 0))
         ).toFixed(3),
       );
-      route.glow.setAttribute("opacity", (amount * 0.025).toFixed(3));
+      route.glow.setAttribute("opacity", (amount * 0.08).toFixed(3));
 
       // Fewer routes on mobile; no travelling packets or decorative motion under reduced motion.
       if (!still && !small && amount > 0.98 && route.index % 2 === 0) {
@@ -354,7 +385,7 @@ export function initAnzBackground() {
         );
         route.packet.setAttribute(
           "opacity",
-          (0.32 * Math.sin(Math.PI * t)).toFixed(3),
+          (0.55 * Math.sin(Math.PI * t)).toFixed(3),
         );
       } else route.packet.setAttribute("opacity", 0);
     });

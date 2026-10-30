@@ -142,16 +142,37 @@ const cityOrder = [
   "Adelaide",
   "Canberra",
   "Wellington",
+  "Christchurch",
+  "Queenstown",
+  "Gold Coast",
+  "Newcastle",
+  "Wollongong",
+  "Hobart",
+  "Darwin",
 ];
+// Satellite cities sit close to a larger neighbour, so their markers are drawn smaller.
+const minorCities = new Set(["Gold Coast", "Newcastle", "Wollongong"]);
+// Natural Earth 1:50m has no Wollongong or Queenstown, so they use their published coordinates.
+const supplemental = {
+  Wollongong: [150.8931, -34.4278],
+  Queenstown: [168.6626, -45.0312],
+};
 const cities = cityOrder.map((name) => {
   const feature = places.features.find(
     (place) =>
       (place.properties.name || place.properties.NAME) === name &&
       place.geometry.coordinates[0] > 110,
   );
-  if (!feature) throw new Error(`Natural Earth city not found: ${name}`);
-  const [x, y] = project(mercator(feature.geometry.coordinates));
-  return { id: name.toLowerCase(), name, x: number(x), y: number(y) };
+  const coordinates = feature?.geometry.coordinates ?? supplemental[name];
+  if (!coordinates) throw new Error(`City coordinates not found: ${name}`);
+  const [x, y] = project(mercator(coordinates));
+  return {
+    id: name.toLowerCase().replaceAll(" ", "-"),
+    name,
+    x: number(x),
+    y: number(y),
+    ...(minorCities.has(name) && { minor: true }),
+  };
 });
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" class="anz-map" aria-hidden="true" focusable="false"><title>Australia and New Zealand</title><metadata>Natural Earth 1:50m, public domain; Mercator projection; source commit ${commit}.</metadata><defs><g id="anz-land" fill="none" stroke-linejoin="round" stroke-linecap="round">${paths.join("")}</g></defs><use class="anz-outline" href="#anz-land"/></svg>\n`;
