@@ -1,7 +1,6 @@
 import {
   siClaude,
   siGit,
-  siGithubactions,
   siGooglegemini,
   siPerplexity,
   siV0,
@@ -9,13 +8,13 @@ import {
 import openaiSvg from "./assets/logos/openai-blossom-black.svg?raw";
 import lovableSvg from "./assets/logos/lovable-logomark-black.svg?raw";
 import gammaSvg from "./assets/logos/gamma-single-colour.svg?raw";
+import githubSvg from "./assets/logos/github-invertocat-black.svg?raw";
 import awsLogo from "./assets/logos/aws-logo.png";
 import vscodeLogo from "./assets/logos/vscode.svg";
 
 const icons = {
   siClaude,
   siGit,
-  siGithubactions,
   siGooglegemini,
   siPerplexity,
   siV0,
@@ -25,6 +24,7 @@ const pressSvgs = {
   openai: openaiSvg,
   lovable: lovableSvg,
   gamma: gammaSvg,
+  github: githubSvg,
 };
 // Press-kit files with effects or transparency, used unmodified and tinted
 // through a CSS mask. ratio is the file's width / height.
