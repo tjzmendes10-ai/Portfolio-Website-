@@ -2,6 +2,7 @@ import "./style.css";
 import { initAnzBackground } from "./anz-background.js";
 import "./portfolio-update.css";
 import { initCounters, initTomChat } from "./portfolio-interactions.js";
+import { initAiTools } from "./ai-tools.js";
 
 document.querySelector("#year").textContent = new Date().getFullYear();
 const sydneyClock = document.querySelector("#sydney-time");
@@ -60,5 +61,6 @@ questions.forEach((question) =>
 );
 
 initAnzBackground();
+initAiTools();
 initCounters();
 initTomChat();
