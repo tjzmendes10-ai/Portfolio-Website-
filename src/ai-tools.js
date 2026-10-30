@@ -10,6 +10,7 @@ import openaiSvg from "./assets/logos/openai-blossom-black.svg?raw";
 import lovableSvg from "./assets/logos/lovable-logomark-black.svg?raw";
 import awsLogo from "./assets/logos/aws-logo.png";
 import vscodeLogo from "./assets/logos/vscode.svg";
+import gammaLogo from "./assets/logos/gamma-mono.png";
 
 const icons = {
   siClaude,
@@ -26,6 +27,7 @@ const pressSvgs = { openai: openaiSvg, lovable: lovableSvg };
 const pressImages = {
   aws: { src: awsLogo, ratio: "1254 / 750" },
   vscode: { src: vscodeLogo, ratio: "1" },
+  gamma: { src: gammaLogo, ratio: "857 / 575" },
 };
 const svgNs = "http://www.w3.org/2000/svg";
 
