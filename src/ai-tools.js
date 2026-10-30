@@ -9,6 +9,7 @@ import {
 import openaiSvg from "./assets/logos/openai-blossom-black.svg?raw";
 import lovableSvg from "./assets/logos/lovable-logomark-black.svg?raw";
 import awsLogo from "./assets/logos/aws-logo.png";
+import vscodeLogo from "./assets/logos/vscode.svg";
 
 const icons = {
   siClaude,
@@ -20,8 +21,12 @@ const icons = {
 };
 // Press-kit SVGs, used as supplied: only the fill is swapped for currentColor.
 const pressSvgs = { openai: openaiSvg, lovable: lovableSvg };
-// Press-kit PNG on a transparent background, tinted through a CSS mask.
-const pressImages = { aws: awsLogo };
+// Press-kit files with effects or transparency, used unmodified and tinted
+// through a CSS mask. ratio is the file's width / height.
+const pressImages = {
+  aws: { src: awsLogo, ratio: "1254 / 750" },
+  vscode: { src: vscodeLogo, ratio: "1" },
+};
 const svgNs = "http://www.w3.org/2000/svg";
 
 function label(svg, name) {
@@ -62,13 +67,14 @@ function pressSvg(markup, name) {
   return { svg, group };
 }
 
-function pressImage(src, name) {
+function pressImage({ src, ratio }, name) {
   const mark = document.createElement("span");
   mark.className = "ai-mask";
   mark.setAttribute("role", "img");
   mark.setAttribute("aria-label", name);
   mark.title = name;
   mark.style.setProperty("--ai-mask", `url("${src}")`);
+  mark.style.aspectRatio = ratio;
   return mark;
 }
 

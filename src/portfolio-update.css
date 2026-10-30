@@ -210,7 +210,6 @@
 .ai-mask {
   display: block;
   height: 22px;
-  aspect-ratio: 1254 / 750;
   background: currentColor;
   -webkit-mask: var(--ai-mask) center / contain no-repeat;
   mask: var(--ai-mask) center / contain no-repeat;
