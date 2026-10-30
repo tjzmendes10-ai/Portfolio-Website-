@@ -8,9 +8,9 @@ import {
 } from "simple-icons";
 import openaiSvg from "./assets/logos/openai-blossom-black.svg?raw";
 import lovableSvg from "./assets/logos/lovable-logomark-black.svg?raw";
+import gammaSvg from "./assets/logos/gamma-single-colour.svg?raw";
 import awsLogo from "./assets/logos/aws-logo.png";
 import vscodeLogo from "./assets/logos/vscode.svg";
-import gammaLogo from "./assets/logos/gamma-mono.png";
 
 const icons = {
   siClaude,
@@ -21,13 +21,16 @@ const icons = {
   siV0,
 };
 // Press-kit SVGs, used as supplied: only the fill is swapped for currentColor.
-const pressSvgs = { openai: openaiSvg, lovable: lovableSvg };
+const pressSvgs = {
+  openai: openaiSvg,
+  lovable: lovableSvg,
+  gamma: gammaSvg,
+};
 // Press-kit files with effects or transparency, used unmodified and tinted
 // through a CSS mask. ratio is the file's width / height.
 const pressImages = {
   aws: { src: awsLogo, ratio: "1254 / 750" },
   vscode: { src: vscodeLogo, ratio: "1" },
-  gamma: { src: gammaLogo, ratio: "857 / 575" },
 };
 const svgNs = "http://www.w3.org/2000/svg";
 
