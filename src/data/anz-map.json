@@ -49,6 +49,45 @@
       "name": "Wellington",
       "x": 905.92,
       "y": 528.32
+    },
+    {
+      "id": "gold-coast",
+      "name": "Gold Coast",
+      "x": 607.94,
+      "y": 302.89,
+      "minor": true
+    },
+    {
+      "id": "newcastle",
+      "name": "Newcastle",
+      "x": 584.5,
+      "y": 381.54,
+      "minor": true
+    },
+    {
+      "id": "wollongong",
+      "name": "Wollongong",
+      "x": 572.24,
+      "y": 406.69,
+      "minor": true
+    },
+    {
+      "id": "hobart",
+      "name": "Hobart",
+      "x": 521.97,
+      "y": 557.64
+    },
+    {
+      "id": "darwin",
+      "name": "Darwin",
+      "x": 292.22,
+      "y": 68.81
+    },
+    {
+      "id": "christchurch",
+      "name": "Christchurch",
+      "x": 875.92,
+      "y": 570.77
     }
   ],
   "source": {

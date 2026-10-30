@@ -26,7 +26,10 @@ export function initAnzBackground() {
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const compact = window.matchMedia("(max-width: 700px), (pointer: coarse)");
   const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-  const thresholds = [0.24, 0.34, 0.44, 0.54, 0.64, 0.74, 0.84, 0.92];
+  // Cities arrive evenly between 24% and 92% of the page scroll.
+  const thresholds = map.cities.map(
+    (_, index) => 0.24 + (index * 0.68) / (map.cities.length - 1),
+  );
 
   const gradient = element("radialGradient", { id: "anz-cursor-gradient" });
   gradient.append(
@@ -76,6 +79,18 @@ export function initAnzBackground() {
     [6, 1],
     [7, 3],
     [7, 0],
+    [8, 0],
+    [8, 3],
+    [9, 0],
+    [9, 2],
+    [10, 6],
+    [10, 1],
+    [11, 1],
+    [11, 0],
+    [12, 4],
+    [12, 2],
+    [13, 7],
+    [13, 3],
   ];
   const routes = connections.map(([to, from], index) => {
     const secondary = index > 0 && connections[index - 1][0] === to;
@@ -128,7 +143,7 @@ export function initAnzBackground() {
     const core = element("circle", {
       cx: city.x,
       cy: city.y,
-      r: city.id === "sydney" ? 2.4 : 1.9,
+      r: city.minor ? 1.4 : city.id === "sydney" ? 2.4 : 1.9,
       class: "anz-city-core",
     });
     group.append(aura, ring, core);
@@ -146,9 +161,12 @@ export function initAnzBackground() {
     return { ...city, group, aura, ring, label, index };
   });
 
-  const ambientPoints = Array.from({ length: 30 }, (_, index) => {
+  // The first points turn into the cities (hidden here), the rest stay as drifting ambient dots.
+  const ambientCount = map.cities.length + 22;
+  const compactLimit = map.cities.length + 10;
+  const ambientPoints = Array.from({ length: ambientCount }, (_, index) => {
     const angle = index * 2.399963;
-    const radius = 0.32 + Math.sqrt((index + 1) / 30) * 0.68;
+    const radius = 0.32 + Math.sqrt((index + 1) / ambientCount) * 0.68;
     const point = {
       x: 700 + Math.cos(angle) * 220 * radius,
       y: 300 + Math.sin(angle) * 205 * radius,
@@ -210,7 +228,7 @@ export function initAnzBackground() {
       pointer.active && finePointer.matches && !still && !small;
     svg.style.setProperty(
       "--outline-opacity",
-      ((0.11 + value * 0.045) * morph).toFixed(3),
+      ((0.27 + value * 0.1) * morph).toFixed(3),
     );
     cursorOutline.style.opacity = morph;
     svg.classList.toggle("is-compact", small);
@@ -229,14 +247,14 @@ export function initAnzBackground() {
           point.node.setAttribute("cy", y.toFixed(2));
           point.node.setAttribute(
             "opacity",
-            index < 8 || (small && index >= 18) ? 0 : 0.45,
+            index < map.cities.length || (small && index >= compactLimit) ? 0 : 0.6,
           );
           return { x, y };
         })
       : map.cities;
     if (showAmbient)
       ambientEdges.forEach(({ from, to, line }) => {
-        if (small && (from >= 18 || to >= 18)) {
+        if (small && (from >= compactLimit || to >= compactLimit)) {
           line.style.display = "none";
           return;
         }
@@ -258,7 +276,7 @@ export function initAnzBackground() {
           "d",
           `M${start.x.toFixed(2)},${start.y.toFixed(2)} L${end.x.toFixed(2)},${end.y.toFixed(2)}`,
         );
-        line.setAttribute("opacity", (0.14 + nearby * 0.22).toFixed(3));
+        line.setAttribute("opacity", (0.28 + nearby * 0.26).toFixed(3));
       });
 
     cities.forEach((city) => {
@@ -273,18 +291,19 @@ export function initAnzBackground() {
       city.group.setAttribute(
         "opacity",
         Math.min(
-          0.67,
-          activation * (small ? 0.56 : 0.67) +
-            ambientOpacity * (1 - morph) * 0.38,
+          0.95,
+          activation * (small ? 0.8 : 0.95) +
+            ambientOpacity * (1 - morph) * 0.5,
         ).toFixed(3),
       );
       // Keep the geographic core fixed; only the aura breathes gently around it.
       const breath = still
         ? 0.5
         : 0.5 + Math.sin(time * 0.00065 + city.index * 1.2) * 0.5;
-      city.aura.setAttribute("r", (8 + breath * 3).toFixed(2));
-      city.aura.setAttribute("opacity", (0.055 + breath * 0.045).toFixed(3));
-      city.ring.setAttribute("r", (4.2 + breath * 1.1).toFixed(2));
+      const size = city.minor ? 0.6 : 1;
+      city.aura.setAttribute("r", ((8 + breath * 3) * size).toFixed(2));
+      city.aura.setAttribute("opacity", (0.11 + breath * 0.08).toFixed(3));
+      city.ring.setAttribute("r", ((4.2 + breath * 1.1) * size).toFixed(2));
     });
 
     routes.forEach((route) => {
@@ -321,16 +340,16 @@ export function initAnzBackground() {
         "opacity",
         (
           amount *
-          ((small ? 0.16 : 0.22) +
+          ((small ? 0.42 : 0.55) +
             (interactive
               ? Math.max(
                   0,
                   1 - Math.hypot(controlX - mouseX, controlY - mouseY) / 180,
-                ) * 0.17
+                ) * 0.25
               : 0))
         ).toFixed(3),
       );
-      route.glow.setAttribute("opacity", (amount * 0.025).toFixed(3));
+      route.glow.setAttribute("opacity", (amount * 0.08).toFixed(3));
 
       // Fewer routes on mobile; no travelling packets or decorative motion under reduced motion.
       if (!still && !small && amount > 0.98 && route.index % 2 === 0) {
@@ -354,7 +373,7 @@ export function initAnzBackground() {
         );
         route.packet.setAttribute(
           "opacity",
-          (0.32 * Math.sin(Math.PI * t)).toFixed(3),
+          (0.55 * Math.sin(Math.PI * t)).toFixed(3),
         );
       } else route.packet.setAttribute("opacity", 0);
     });
