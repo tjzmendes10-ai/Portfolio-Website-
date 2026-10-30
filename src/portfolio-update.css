@@ -164,11 +164,12 @@
 }
 .ai-tools {
   --ai-logo: 30px;
+  --ai-gap: 48px;
   margin-top: 26px;
   padding-top: 24px;
   border-top: 1px solid var(--line);
   display: grid;
-  gap: 48px;
+  gap: var(--ai-gap);
 }
 .ai-tool-group {
   display: flex;
@@ -186,7 +187,7 @@
 .ai-tool-group ul {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 80px));
-  gap: 22px 20px;
+  gap: var(--ai-gap) 20px;
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -443,7 +444,7 @@
   }
   .ai-tools {
     --ai-logo: 26px;
-    gap: 36px;
+    --ai-gap: 36px;
     margin-top: 22px;
     padding-top: 20px;
   }
@@ -458,7 +459,7 @@
   .ai-tool-group ul {
     width: 100%;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 18px 12px;
+    column-gap: 12px;
   }
   .tom-chat-log {
     height: 290px;
