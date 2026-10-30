@@ -142,7 +142,7 @@
 .ai-practice-section {
   border-block: 1px solid var(--line);
   padding-block: 48px;
-  background: #0c251cbe;
+  background: #0c251c80;
 }
 .ai-practice-layout {
   display: grid;
