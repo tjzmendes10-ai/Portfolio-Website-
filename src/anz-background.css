@@ -17,6 +17,14 @@ body {
   inset: 0;
   background: linear-gradient(90deg, #081b1760, transparent 55%, #081b1710);
 }
+.anz-scrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
 .anz-map-stage {
   position: absolute;
   width: min(1130px, 84vw);
@@ -137,7 +145,7 @@ body {
 .results-section,
 .about-section,
 .ask-section {
-  background: linear-gradient(90deg, #081b17c2, #081b1782 60%, #081b1750);
+  background: linear-gradient(90deg, #081b1770, #081b1748 60%, #081b1730);
 }
 .numbers-strip {
   border-color: #a9d1b522;
@@ -157,10 +165,10 @@ body {
   color: #82a88f;
 }
 .experience-section {
-  background: linear-gradient(90deg, #081b17a6, #081b1744);
+  background: linear-gradient(90deg, #081b175a, #081b172e);
 }
 .approach-section {
-  background: linear-gradient(100deg, #102a20e6, #0a2017a3);
+  background: linear-gradient(100deg, #102a20bf, #0a201770);
   color: var(--text);
   border-block: 1px solid #a9d1b51a;
 }
@@ -282,13 +290,13 @@ body {
   .results-section,
   .about-section,
   .ask-section {
-    background: #081b1799;
+    background: #081b1766;
   }
   .experience-section {
-    background: #081b1794;
+    background: #081b1760;
   }
   .approach-section {
-    background: #0d281bb3;
+    background: #0d281b88;
   }
 }
 @media (max-width: 600px) {
