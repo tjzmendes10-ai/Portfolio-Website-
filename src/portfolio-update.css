@@ -163,6 +163,7 @@
   min-width: 0;
 }
 .ai-tools {
+  --ai-logo: 30px;
   margin-top: 26px;
   padding-top: 24px;
   border-top: 1px solid var(--line);
@@ -175,18 +176,18 @@
   gap: 22px;
 }
 .ai-tools .small-label {
-  flex: 0 0 44px;
+  flex: 0 0 60px;
   margin: 0;
   color: #6faa88;
-  font-size: 8px;
+  font-size: 11px;
   letter-spacing: 0.12em;
-  line-height: 22px;
+  line-height: var(--ai-logo);
 }
 .ai-tool-group ul {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px 26px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 80px));
+  gap: 22px 20px;
+  min-width: 0;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -194,7 +195,7 @@
 .ai-tool {
   display: flex;
   align-items: center;
-  height: 22px;
+  height: var(--ai-logo);
   color: var(--mint);
   opacity: 0.6;
   transition: opacity 0.25s ease;
@@ -205,11 +206,11 @@
 .ai-tool svg {
   display: block;
   width: auto;
-  height: 22px;
+  height: var(--ai-logo);
 }
 .ai-mask {
   display: block;
-  height: 22px;
+  height: var(--ai-logo);
   background: currentColor;
   -webkit-mask: var(--ai-mask) center / contain no-repeat;
   mask: var(--ai-mask) center / contain no-repeat;
@@ -440,6 +441,7 @@
     font-size: 13px;
   }
   .ai-tools {
+    --ai-logo: 26px;
     margin-top: 22px;
     padding-top: 20px;
   }
@@ -452,12 +454,9 @@
     flex-basis: auto;
   }
   .ai-tool-group ul {
-    gap: 14px 22px;
-  }
-  .ai-tool,
-  .ai-tool svg,
-  .ai-mask {
-    height: 20px;
+    width: 100%;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px 12px;
   }
   .tom-chat-log {
     height: 290px;
