@@ -168,7 +168,7 @@
   padding-top: 24px;
   border-top: 1px solid var(--line);
   display: grid;
-  gap: 18px;
+  gap: 48px;
 }
 .ai-tool-group {
   display: flex;
@@ -195,6 +195,7 @@
 .ai-tool {
   display: flex;
   align-items: center;
+  justify-content: center;
   height: var(--ai-logo);
   color: var(--mint);
   opacity: 0.6;
@@ -442,6 +443,7 @@
   }
   .ai-tools {
     --ai-logo: 26px;
+    gap: 36px;
     margin-top: 22px;
     padding-top: 20px;
   }
