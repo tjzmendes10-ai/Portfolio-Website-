@@ -477,6 +477,13 @@ export function initAnzBackground() {
   const observer = new ResizeObserver(updateGeometry);
   observer.observe(stage);
   observer.observe(document.body);
+  // The timeline reads across the map, so the map steps back while it is in view.
+  const journey = document.querySelector(".experience-section");
+  if (journey && "IntersectionObserver" in window)
+    new IntersectionObserver(
+      ([entry]) => layer.classList.toggle("is-quiet", entry.isIntersecting),
+      { rootMargin: "-30% 0px -30% 0px" },
+    ).observe(journey);
   updateGeometry();
   progress = motion.matches ? 1 : targetProgress;
   sync();

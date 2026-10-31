@@ -33,6 +33,20 @@ body {
   top: 49%;
   transform: translate(-50%, -50%);
 }
+.anz-map-stage {
+  transition: opacity 0.6s ease;
+}
+.anz-background.is-quiet .anz-map-stage {
+  opacity: 0.25;
+}
+.anz-background.is-quiet .anz-sydney-label {
+  visibility: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .anz-map-stage {
+    transition: none;
+  }
+}
 .anz-map {
   display: block;
   width: 100%;

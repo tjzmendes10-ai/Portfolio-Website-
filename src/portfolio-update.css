@@ -14,14 +14,19 @@
   color: #edf4ee;
   white-space: nowrap;
 }
-.hero h1 .headline-secondary {
-  display: block;
+.hero h1:has(+ .headline-secondary) {
+  margin-bottom: 0;
+}
+.hero .headline-secondary {
+  font-family: "Manrope", sans-serif;
+  font-weight: 500;
   color: #bceacb;
   font-size: clamp(21px, 2.75vw, 40px);
   line-height: 1.35;
   letter-spacing: -0.035em;
-  white-space: nowrap;
-  margin-top: 10px;
+  max-width: 15em;
+  text-wrap: balance;
+  margin: 10px 0 24px;
 }
 .button-primary .button-arrow {
   width: 21px;
@@ -133,8 +138,48 @@
 .timeline article > p:not(.timeline-role) {
   font-size: 13px;
   line-height: 1.9;
-  color: #88a393;
+  color: #b0c6b8;
   margin: 0 0 12px;
+  max-width: 46ch;
+  text-wrap: pretty;
+}
+.timeline-top > span {
+  font-size: 11px;
+  color: #b0c6b8;
+}
+/* "Now" sits above the jobs as a lighter note: hollow marker, smaller title, a tag instead of dates. */
+.timeline .timeline-now .timeline-dot {
+  width: 9px;
+  height: 9px;
+  translate: -2px -2px;
+  background: var(--bg);
+  border: 1px dashed #8db29b;
+}
+.timeline-now + article .timeline-dot {
+  background: var(--mint);
+}
+.timeline .timeline-now h3 {
+  font-size: 15px;
+  letter-spacing: -0.02em;
+  color: #d3e5d9;
+}
+.timeline .timeline-now-tag {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8fd1aa;
+  border: 1px solid #68977a55;
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+.timeline .timeline-now > p {
+  font-size: 12px;
+  margin-top: 6px;
+}
+.footer-note {
+  margin: 20px 0 0;
+  font-size: 15px;
+  color: #b0c6b8;
 }
 .timeline article > p:last-child {
   margin-bottom: 0;
@@ -503,7 +548,7 @@
   .hero h1 {
     font-size: clamp(35px, 10.6vw, 63px);
   }
-  .hero h1 .headline-secondary {
+  .hero .headline-secondary {
     font-size: clamp(19px, 5.3vw, 30px);
     letter-spacing: -0.035em;
     margin-top: 8px;

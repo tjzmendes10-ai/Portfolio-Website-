@@ -680,9 +680,6 @@ h2 span {
   top: 10px;
   box-shadow: 0 0 0 5px var(--bg);
 }
-.timeline article:first-child .timeline-dot {
-  background: var(--mint);
-}
 .timeline-top {
   display: flex;
   align-items: baseline;
