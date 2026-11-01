@@ -310,11 +310,12 @@ export function initAnzBackground() {
     // Spokes retract over the first few percent of scroll, following the dots as they start to move.
     const spokeFade = still ? 0 : 1 - smooth(value / 0.07);
     spokesGroup.style.display = spokeFade > 0.001 ? "" : "none";
-    spokes.forEach(({ city, line, start, index }) => {
+    // Every dot keeps its spoke on compact screens too: the lines are cheap, and a dot with no line looks broken.
+    spokes.forEach(({ city, line, start }) => {
       const target = landing.get(city);
       const end = target ? position(target) : city;
       const amount = smooth((seconds - start) / spokeLength);
-      if (still || amount === 0 || (small && index % 2)) {
+      if (still || amount === 0) {
         line.style.display = "none";
         return;
       }
