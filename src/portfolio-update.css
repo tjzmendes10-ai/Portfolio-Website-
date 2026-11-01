@@ -45,27 +45,6 @@
   font-size: 1em;
   margin-left: 0;
 }
-.network-proof-label {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 9px 12px;
-  color: #c2d9ca;
-  background: #0a211bce;
-  border: 1px solid #6d9c7b44;
-  border-radius: 3px;
-  font-size: 10px;
-  line-height: 1.5;
-  max-width: 95%;
-}
-.network-proof-label i {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #34d399;
-  flex: none;
-}
 /* Thin and faint: Edinburgh, Dublin, Amsterdam and Brussels crowd around London, and the hero stats sit on top. */
 .europe-outline {
   stroke: #34d399;
@@ -78,17 +57,22 @@
   stroke-linecap: round;
   stroke-opacity: 0.4;
 }
-.proof-target {
-  left: 8%;
-  top: 19%;
+/* The pinned map labels need room, so small and touch screens get this one line instead. */
+.hero-launch-line {
+  display: none;
+  position: absolute;
+  left: 0;
+  bottom: 5%;
+  margin: 0;
+  max-width: 92%;
+  color: #8eb9a1;
+  font-size: 10px;
+  line-height: 1.6;
 }
-.proof-energy {
-  right: 0;
-  top: 44%;
-}
-.proof-markets {
-  left: 14%;
-  bottom: 15%;
+@media (max-width: 700px), (pointer: coarse) {
+  .hero-launch-line {
+    display: block;
+  }
 }
 .selling-footprint {
   margin-top: 38px;
@@ -416,20 +400,6 @@
   .ai-practice-layout {
     gap: 8%;
   }
-  .network-proof-label {
-    font-size: 9px;
-    padding: 8px 10px;
-    gap: 7px;
-  }
-  .proof-target {
-    left: 0;
-  }
-  .proof-energy {
-    right: 0;
-  }
-  .proof-markets {
-    left: 0;
-  }
   .tom-chat-header,
   .tom-chat-log {
     padding: 18px;
@@ -445,23 +415,6 @@
   .hero-map-window {
     min-height: 155px;
     margin: 6px 0 10px;
-  }
-  .network-proof-label {
-    font-size: 9px;
-    padding: 6px 9px;
-    max-width: 90%;
-  }
-  .proof-target {
-    left: 2%;
-    top: 5%;
-  }
-  .proof-energy {
-    right: 0;
-    top: 38%;
-  }
-  .proof-markets {
-    left: 7%;
-    bottom: 5%;
   }
   .selling-footprint {
     padding: 24px 20px;
