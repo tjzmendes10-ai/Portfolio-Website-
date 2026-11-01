@@ -12,6 +12,7 @@ import githubSvg from "./assets/logos/github-invertocat-black.svg?raw";
 import paperSvg from "./assets/logos/paper-design-mark.svg?raw";
 import awsLogo from "./assets/logos/aws-logo.png";
 import vscodeLogo from "./assets/logos/vscode.svg";
+import claudeCodeLogo from "./assets/logos/claude-code.png";
 
 const icons = {
   siClaude,
@@ -33,6 +34,10 @@ const pressSvgs = {
 const pressImages = {
   aws: { src: awsLogo, ratio: "1254 / 750" },
   vscode: { src: vscodeLogo, ratio: "1" },
+};
+// Logos supplied as ready-made images, shown exactly as they are (no recolouring, no tracing).
+const plainImages = {
+  claudecode: claudeCodeLogo,
 };
 const svgNs = "http://www.w3.org/2000/svg";
 
@@ -88,7 +93,7 @@ function pressImage({ src, ratio }, name) {
 // Tools without a logo keep their text and become text tags.
 export function initAiTools() {
   document.querySelectorAll(".ai-tool").forEach((item) => {
-    const { name, icon, press } = item.dataset;
+    const { name, icon, press, image } = item.dataset;
     if (icon in icons) {
       item.replaceChildren(simpleIcon(icons[icon], name));
     } else if (press in pressSvgs) {
@@ -99,6 +104,13 @@ export function initAiTools() {
       svg.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
     } else if (press in pressImages) {
       item.replaceChildren(pressImage(pressImages[press], name));
+    } else if (image in plainImages) {
+      const logo = document.createElement("img");
+      logo.src = plainImages[image];
+      logo.alt = name;
+      logo.className = "ai-image";
+      logo.decoding = "async";
+      item.replaceChildren(logo);
     } else {
       item.classList.add("is-text");
       item.title = name;
