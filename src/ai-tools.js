@@ -34,10 +34,14 @@ const pressSvgs = {
 const pressImages = {
   aws: { src: awsLogo, ratio: "1254 / 750" },
   vscode: { src: vscodeLogo, ratio: "1" },
-};
-// Logos supplied as ready-made images, shown exactly as they are (no recolouring, no tracing).
-const plainImages = {
-  claudecode: claudeCodeLogo,
+  // The mascot sits in a square image with empty bands above and below it, so the element is cropped to
+  // the mark itself (447 x 280 of the 447 x 447 file) and sized to look as big as its neighbours.
+  claudecode: {
+    src: claudeCodeLogo,
+    ratio: "447 / 280",
+    size: "100% auto",
+    scale: 0.77,
+  },
 };
 const svgNs = "http://www.w3.org/2000/svg";
 
@@ -79,7 +83,7 @@ function pressSvg(markup, name) {
   return { svg, group };
 }
 
-function pressImage({ src, ratio }, name) {
+function pressImage({ src, ratio, size, scale }, name) {
   const mark = document.createElement("span");
   mark.className = "ai-mask";
   mark.setAttribute("role", "img");
@@ -87,13 +91,16 @@ function pressImage({ src, ratio }, name) {
   mark.title = name;
   mark.style.setProperty("--ai-mask", `url("${src}")`);
   mark.style.aspectRatio = ratio;
+  if (size) mark.style.setProperty("--ai-mask-size", size);
+  // A wide mark at full height would look much bigger than the square ones, so it is scaled to match their weight.
+  if (scale) mark.style.height = `calc(var(--ai-logo) * ${scale})`;
   return mark;
 }
 
 // Tools without a logo keep their text and become text tags.
 export function initAiTools() {
   document.querySelectorAll(".ai-tool").forEach((item) => {
-    const { name, icon, press, image } = item.dataset;
+    const { name, icon, press } = item.dataset;
     if (icon in icons) {
       item.replaceChildren(simpleIcon(icons[icon], name));
     } else if (press in pressSvgs) {
@@ -104,13 +111,6 @@ export function initAiTools() {
       svg.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
     } else if (press in pressImages) {
       item.replaceChildren(pressImage(pressImages[press], name));
-    } else if (image in plainImages) {
-      const logo = document.createElement("img");
-      logo.src = plainImages[image];
-      logo.alt = name;
-      logo.className = "ai-image";
-      logo.decoding = "async";
-      item.replaceChildren(logo);
     } else {
       item.classList.add("is-text");
       item.title = name;
