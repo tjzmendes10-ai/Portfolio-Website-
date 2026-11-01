@@ -1,0 +1,154 @@
+{
+  "width": 1000,
+  "height": 680,
+  "hub": "london",
+  "cities": [
+    {
+      "id": "london",
+      "name": "London",
+      "x": 477.17,
+      "y": 374.41,
+      "target": "sydney"
+    },
+    {
+      "id": "edinburgh",
+      "name": "Edinburgh",
+      "x": 433.39,
+      "y": 268.16
+    },
+    {
+      "id": "dublin",
+      "name": "Dublin",
+      "x": 390.5,
+      "y": 331.68,
+      "target": "perth"
+    },
+    {
+      "id": "paris",
+      "name": "Paris",
+      "x": 512.07,
+      "y": 432.73,
+      "target": "adelaide"
+    },
+    {
+      "id": "madrid",
+      "name": "Madrid",
+      "x": 426.81,
+      "y": 600.96,
+      "target": "hobart"
+    },
+    {
+      "id": "lisbon",
+      "name": "Lisbon",
+      "x": 349.69,
+      "y": 631.69
+    },
+    {
+      "id": "bern",
+      "name": "Bern",
+      "x": 584.29,
+      "y": 473.61,
+      "target": "canberra"
+    },
+    {
+      "id": "amsterdam",
+      "name": "Amsterdam",
+      "x": 548.25,
+      "y": 354.94,
+      "target": "newcastle"
+    },
+    {
+      "id": "brussels",
+      "name": "Brussels",
+      "x": 540.01,
+      "y": 389.42,
+      "target": "wollongong"
+    },
+    {
+      "id": "berlin",
+      "name": "Berlin",
+      "x": 668.06,
+      "y": 350.96,
+      "target": "gold-coast"
+    },
+    {
+      "id": "copenhagen",
+      "name": "Copenhagen",
+      "x": 656.22,
+      "y": 274.89,
+      "target": "brisbane"
+    },
+    {
+      "id": "oslo",
+      "name": "Oslo",
+      "x": 630.62,
+      "y": 162.44
+    },
+    {
+      "id": "stockholm",
+      "name": "Stockholm",
+      "x": 733.95,
+      "y": 179.04
+    },
+    {
+      "id": "helsinki",
+      "name": "Helsinki",
+      "x": 830.91,
+      "y": 155.5
+    },
+    {
+      "id": "warsaw",
+      "name": "Warsaw",
+      "x": 775.46,
+      "y": 357.74
+    },
+    {
+      "id": "rome",
+      "name": "Rome",
+      "x": 655.09,
+      "y": 572.91,
+      "target": "queenstown"
+    },
+    {
+      "id": "milan",
+      "name": "Milan",
+      "x": 608.8,
+      "y": 503.09,
+      "target": "melbourne"
+    },
+    {
+      "id": "prague",
+      "name": "Prague",
+      "x": 682.51,
+      "y": 406.02
+    },
+    {
+      "id": "reykjavik",
+      "name": "Reykjavik",
+      "x": 169.09,
+      "y": 35,
+      "target": "darwin"
+    },
+    {
+      "id": "athens",
+      "name": "Athens",
+      "x": 813.95,
+      "y": 645,
+      "target": "christchurch"
+    },
+    {
+      "id": "cluj-napoca",
+      "name": "Cluj-Napoca",
+      "x": 811.95,
+      "y": 476.62,
+      "target": "wellington"
+    },
+    {
+      "id": "budapest",
+      "name": "Budapest",
+      "x": 748.29,
+      "y": 461.45,
+      "target": "auckland"
+    }
+  ]
+}

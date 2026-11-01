@@ -1,5 +1,7 @@
 import outline from "./assets/anz-outline.svg?raw";
+import europeOutline from "./assets/europe-outline.svg?raw";
 import map from "./data/anz-map.json";
+import europe from "./data/europe-map.json";
 import "./anz-background.css";
 
 const ns = "http://www.w3.org/2000/svg";
@@ -8,6 +10,7 @@ const smooth = (value) => {
   const t = clamp(value);
   return t * t * (3 - 2 * t);
 };
+const mix = (from, to, amount) => from + (to - from) * amount;
 const element = (tag, attributes = {}) => {
   const node = document.createElementNS(ns, tag);
   Object.entries(attributes).forEach(([name, value]) =>
@@ -59,10 +62,16 @@ export function initAnzBackground() {
   });
   svg.append(cursorOutline);
 
+  // The Europe coastline lives in the same frame as the ANZ one, so it fades out as the dots glide away.
+  const europeLand = document.createElement("div");
+  europeLand.innerHTML = europeOutline;
+  const europeCoast = europeLand.querySelector(".europe-outline");
+  svg.append(europeCoast);
+
   const routesGroup = element("g", { class: "anz-routes" });
   const nodesGroup = element("g", { class: "anz-cities" });
-  const ambientGroup = element("g", { class: "anz-ambient-network" });
-  svg.append(ambientGroup, routesGroup, nodesGroup);
+  const spokesGroup = element("g", { class: "europe-spokes" });
+  svg.append(spokesGroup, routesGroup, nodesGroup);
 
   // Each arriving city connects to one or two earlier cities. These are an aspirational motif, not past-work locations.
   const connections = [
@@ -127,79 +136,99 @@ export function initAnzBackground() {
     };
   });
 
-  const cities = map.cities.map((city, index) => {
-    const group = element("g", { opacity: 0, "data-city": city.id });
+  // One marker style for every dot, so a European dot can become an ANZ city without changing look.
+  const marker = (x, y, coreRadius) => {
+    const group = element("g", { opacity: 0 });
     const aura = element("circle", {
-      cx: city.x,
-      cy: city.y,
+      cx: x,
+      cy: y,
       r: 9,
       class: "anz-city-aura",
     });
     const ring = element("circle", {
-      cx: city.x,
-      cy: city.y,
+      cx: x,
+      cy: y,
       r: 5,
       class: "anz-city-ring",
     });
     const core = element("circle", {
-      cx: city.x,
-      cy: city.y,
-      r: city.minor ? 1.4 : city.id === "sydney" ? 2.4 : 1.9,
+      cx: x,
+      cy: y,
+      r: coreRadius,
       class: "anz-city-core",
     });
     group.append(aura, ring, core);
-    let label;
-    if (city.id === "sydney") {
-      label = element("text", {
-        x: city.x + 11,
-        y: city.y - 9,
-        class: "anz-sydney-label",
-      });
-      label.textContent = "Sydney";
-      group.append(label);
-    }
     nodesGroup.append(group);
-    return { ...city, group, aura, ring, label, index };
-  });
+    return { group, aura, ring, core };
+  };
+  const cityLabel = (city, text, className) => {
+    const label = element("text", {
+      x: city.x + 11,
+      y: city.y - 9,
+      class: className,
+    });
+    label.textContent = text;
+    return label;
+  };
 
-  // The first points turn into the cities (hidden here), the rest stay as drifting ambient dots.
-  const ambientCount = map.cities.length + 22;
-  const compactLimit = map.cities.length + 10;
-  const ambientPoints = Array.from({ length: ambientCount }, (_, index) => {
-    const angle = index * 2.399963;
-    const radius = 0.32 + Math.sqrt((index + 1) / ambientCount) * 0.68;
-    const point = {
-      x: 700 + Math.cos(angle) * 220 * radius,
-      y: 300 + Math.sin(angle) * 205 * radius,
-      target: map.cities[index % map.cities.length],
-      phase: index * 1.71,
-      node: element("circle", {
-        r: index % 7 === 0 ? 2.3 : 1.3,
-        class: "anz-ambient-node",
-      }),
-    };
-    ambientGroup.append(point.node);
-    return point;
+  const hub = europe.cities.find((city) => city.id === europe.hub);
+  // Spokes go to every other city, nearest first, so the bridges ripple outwards from London.
+  const spokeOrder = europe.cities
+    .filter((city) => city !== hub)
+    .sort(
+      (a, b) =>
+        Math.hypot(a.x - hub.x, a.y - hub.y) -
+        Math.hypot(b.x - hub.x, b.y - hub.y),
+    );
+  // The opening draws in about 2s of real time (the page loads at the top, so scroll can't drive it).
+  const spokeStart = 0.25,
+    spokeStagger = 0.065,
+    spokeLength = 0.5;
+  const spokes = spokeOrder.map((city, index) => {
+    const line = element("path", {
+      class: "europe-spoke",
+      fill: "none",
+      "vector-effect": "non-scaling-stroke",
+    });
+    spokesGroup.append(line);
+    const start = spokeStart + index * spokeStagger;
+    return { city, line, start, index };
   });
-  const ambientEdges = ambientPoints.flatMap((point, from) =>
-    ambientPoints
-      .map((other, to) => ({
-        to,
-        distance: Math.hypot(point.x - other.x, point.y - other.y),
-      }))
-      .filter((other) => other.to > from)
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 2)
-      .map(({ to }) => {
-        const line = element("path", {
-          class: "anz-ambient-line",
-          fill: "none",
-          "vector-effect": "non-scaling-stroke",
-        });
-        ambientGroup.prepend(line);
-        return { from, to, line };
-      }),
+  // Each ANZ city is the landing spot of one European dot; unmatched dots fade out mid-glide.
+  const sources = new Map(
+    europe.cities
+      .filter((city) => city.target)
+      .map((city) => [city.target, city]),
   );
+  const arrivals = new Map(
+    spokes.map((spoke) => [spoke.city.id, spoke.start + spokeLength * 0.7]),
+  );
+
+  const cities = map.cities.map((city, index) => {
+    const source = sources.get(city.id);
+    const parts = marker(
+      source.x,
+      source.y,
+      city.minor ? 1.4 : city.id === "sydney" ? 2.4 : 1.9,
+    );
+    // Markers are drawn at their European position and translated, so they glide as one group.
+    let label, hubLabel;
+    if (city.id === "sydney") {
+      // Both labels are placed from the London dot; they travel with it and cross-fade.
+      label = cityLabel(source, "Sydney", "anz-sydney-label");
+      hubLabel = cityLabel(source, "London", "anz-sydney-label");
+      parts.group.append(label, hubLabel);
+    }
+    return { ...city, ...parts, source, label, hubLabel, index };
+  });
+  const landing = new Map(cities.map((city) => [city.source, city]));
+  const leftovers = europe.cities
+    .filter((city) => !city.target)
+    .map((city, index) => ({
+      ...city,
+      ...marker(city.x, city.y, 1.4),
+      index: index + map.cities.length,
+    }));
 
   let bounds = svg.getBoundingClientRect();
   let pointer = { x: -1000, y: -1000, active: false };
@@ -222,7 +251,6 @@ export function initAnzBackground() {
     const still = motion.matches;
     const small = compact.matches;
     const morph = still ? 1 : smooth((value - 0.01) / 0.27);
-    const ambientOpacity = still ? 0 : 1 - smooth((value - 0.08) / 0.23);
     const mouseX = ((pointer.x - bounds.left) / bounds.width) * map.width;
     const mouseY = ((pointer.y - bounds.top) / bounds.height) * map.height;
     const interactive =
@@ -235,78 +263,83 @@ export function initAnzBackground() {
     svg.classList.toggle("is-compact", small);
     footer.classList.toggle("is-network-complete", value >= 0.99);
 
-    ambientGroup.setAttribute("opacity", ambientOpacity.toFixed(3));
-    const showAmbient = ambientOpacity > 0.001;
-    ambientGroup.style.display = showAmbient ? "" : "none";
-    const positions = showAmbient
-      ? ambientPoints.map((point, index) => {
-          const driftX = still ? 0 : Math.sin(time * 0.00023 + point.phase) * 7;
-          const driftY = still ? 0 : Math.cos(time * 0.00019 + point.phase) * 6;
-          const x = (point.x + driftX) * (1 - morph) + point.target.x * morph;
-          const y = (point.y + driftY) * (1 - morph) + point.target.y * morph;
-          point.node.setAttribute("cx", x.toFixed(2));
-          point.node.setAttribute("cy", y.toFixed(2));
-          point.node.setAttribute(
-            "opacity",
-            index < map.cities.length || (small && index >= compactLimit)
-              ? 0
-              : 0.6,
-          );
-          return { x, y };
-        })
-      : map.cities;
-    if (showAmbient)
-      ambientEdges.forEach(({ from, to, line }) => {
-        if (small && (from >= compactLimit || to >= compactLimit)) {
-          line.style.display = "none";
-          return;
-        }
-        line.style.display = "";
-        const start = positions[from],
-          end = positions[to];
-        const nearby = interactive
-          ? Math.max(
-              0,
-              1 -
-                Math.hypot(
-                  (start.x + end.x) / 2 - mouseX,
-                  (start.y + end.y) / 2 - mouseY,
-                ) /
-                  170,
-            )
-          : 0;
-        line.setAttribute(
-          "d",
-          `M${start.x.toFixed(2)},${start.y.toFixed(2)} L${end.x.toFixed(2)},${end.y.toFixed(2)}`,
-        );
-        line.setAttribute("opacity", (0.28 + nearby * 0.26).toFixed(3));
-      });
+    europeCoast.style.opacity = still
+      ? 0
+      : (smooth(time / 1200) * (1 - morph)).toFixed(3);
+
+    // Dots glide with the same scroll morph the old ambient dots used; each ANZ city is one European dot.
+    const seconds = time / 1000;
+    const position = (city) => ({
+      x: mix(city.source.x, city.x, morph),
+      y: mix(city.source.y, city.y, morph),
+    });
+    const hubPosition = position(cities[0]);
+    // Spokes retract over the first few percent of scroll, following the dots as they start to move.
+    const spokeFade = still ? 0 : 1 - smooth(value / 0.07);
+    spokesGroup.style.display = spokeFade > 0.001 ? "" : "none";
+    spokes.forEach(({ city, line, start, index }) => {
+      const target = landing.get(city);
+      const end = target ? position(target) : city;
+      const amount = smooth((seconds - start) / spokeLength);
+      if (still || amount === 0 || (small && index % 2)) {
+        line.style.display = "none";
+        return;
+      }
+      line.style.display = "";
+      line.setAttribute(
+        "d",
+        `M${hubPosition.x.toFixed(2)},${hubPosition.y.toFixed(2)} L${mix(hubPosition.x, end.x, amount).toFixed(2)},${mix(hubPosition.y, end.y, amount).toFixed(2)}`,
+      );
+      line.setAttribute("opacity", (amount * spokeFade).toFixed(3));
+    });
+
+    const pulse = (dot, size) => {
+      // Keep the geographic core fixed; only the aura breathes gently around it.
+      const breath = still
+        ? 0.5
+        : 0.5 + Math.sin(time * 0.00065 + dot.index * 1.2) * 0.5;
+      dot.aura.setAttribute("r", ((8 + breath * 3) * size).toFixed(2));
+      dot.aura.setAttribute("opacity", (0.11 + breath * 0.08).toFixed(3));
+      dot.ring.setAttribute("r", ((4.2 + breath * 1.1) * size).toFixed(2));
+    };
+    const arrived = (id) =>
+      still ? 1 : smooth((seconds - arrivals.get(id)) / 0.25);
+    const scale = small ? 0.8 : 0.95;
 
     cities.forEach((city) => {
       const activation = still
         ? 1
         : smooth((value - thresholds[city.index]) / 0.065);
+      const { x, y } = position(city);
       city.group.setAttribute(
         "transform",
-        `translate(${(positions[city.index].x - city.x).toFixed(2)},${(positions[city.index].y - city.y).toFixed(2)})`,
+        `translate(${(x - city.source.x).toFixed(2)},${(y - city.source.y).toFixed(2)})`,
       );
-      if (city.label) city.label.setAttribute("opacity", activation.toFixed(3));
+      // London is on screen from the start; other dots appear as their spoke reaches them.
+      const landed =
+        city.source === hub ? smooth(seconds / 0.4) : arrived(city.source.id);
+      if (city.label) {
+        city.label.setAttribute("opacity", activation.toFixed(3));
+        city.hubLabel.setAttribute(
+          "opacity",
+          (still ? 0 : landed * (1 - smooth(morph / 0.35))).toFixed(3),
+        );
+      }
+      // Once a dot has landed it stays; the city's own arrival only adds the label and routes.
       city.group.setAttribute(
         "opacity",
-        Math.min(
-          0.95,
-          activation * (small ? 0.8 : 0.95) +
-            ambientOpacity * (1 - morph) * 0.5,
-        ).toFixed(3),
+        Math.min(0.95, Math.max(activation, landed) * scale).toFixed(3),
       );
-      // Keep the geographic core fixed; only the aura breathes gently around it.
-      const breath = still
-        ? 0.5
-        : 0.5 + Math.sin(time * 0.00065 + city.index * 1.2) * 0.5;
-      const size = city.minor ? 0.6 : 1;
-      city.aura.setAttribute("r", ((8 + breath * 3) * size).toFixed(2));
-      city.aura.setAttribute("opacity", (0.11 + breath * 0.08).toFixed(3));
-      city.ring.setAttribute("r", ((4.2 + breath * 1.1) * size).toFixed(2));
+      pulse(city, city.minor ? mix(1, 0.6, morph) : 1);
+    });
+    leftovers.forEach((dot) => {
+      const fade = still ? 0 : arrived(dot.id) * (1 - smooth(morph / 0.6));
+      dot.group.style.display = fade > 0.001 ? "" : "none";
+      dot.group.setAttribute(
+        "opacity",
+        Math.min(0.95, fade * scale).toFixed(3),
+      );
+      pulse(dot, 0.6);
     });
 
     routes.forEach((route) => {
