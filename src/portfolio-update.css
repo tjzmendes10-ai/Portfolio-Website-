@@ -66,13 +66,17 @@
   background: #34d399;
   flex: none;
 }
-.anz-ambient-node {
-  fill: #90cba4;
+/* Thin and faint: Edinburgh, Dublin, Amsterdam and Brussels crowd around London, and the hero stats sit on top. */
+.europe-outline {
+  stroke: #34d399;
+  stroke-width: 0.85;
+  stroke-opacity: 0.3;
 }
-.anz-ambient-line {
-  stroke: #65cba0;
-  stroke-width: 0.7;
+.europe-spoke {
+  stroke: #34d399;
+  stroke-width: 0.6;
   stroke-linecap: round;
+  stroke-opacity: 0.4;
 }
 .proof-target {
   left: 8%;
