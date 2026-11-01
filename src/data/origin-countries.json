@@ -1,0 +1,15 @@
+{
+  "width": 1000,
+  "height": 680,
+  "countries": [
+    "United Kingdom",
+    "Canada",
+    "Portugal"
+  ],
+  "source": {
+    "commit": "ca96624a56bd078437bca8184e78163e5039ad19",
+    "countries": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_50m_admin_0_countries.geojson",
+    "licence": "Public domain",
+    "terms": "https://www.naturalearthdata.com/about/terms-of-use/"
+  }
+}

@@ -55,7 +55,8 @@ body {
   color: #34d399;
 }
 .anz-outline,
-.anz-cursor-outline {
+.anz-cursor-outline,
+.anz-origin-morph {
   fill: none;
   stroke: #34d399;
   stroke-width: 0.85;

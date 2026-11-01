@@ -1,5 +1,8 @@
 import outline from "./assets/anz-outline.svg?raw";
+import originOutline from "./assets/origin-outline.svg?raw";
 import map from "./data/anz-map.json";
+import flubber from "flubber";
+const { combine } = flubber;
 import "./anz-background.css";
 
 const ns = "http://www.w3.org/2000/svg";
@@ -62,7 +65,30 @@ export function initAnzBackground() {
   const routesGroup = element("g", { class: "anz-routes" });
   const nodesGroup = element("g", { class: "anz-cities" });
   const ambientGroup = element("g", { class: "anz-ambient-network" });
-  svg.append(ambientGroup, routesGroup, nodesGroup);
+
+  // Where Tom's story starts (UK, Canada, Portugal) morphing, point by point, into
+  // where it lands (Australia and New Zealand) — replaces an unrelated random mesh
+  // with a shape that actually means something.
+  const originDoc = new DOMParser().parseFromString(
+    originOutline,
+    "image/svg+xml",
+  );
+  const originPaths = [...originDoc.querySelectorAll("#origin-land path")].map(
+    (path) => path.getAttribute("d"),
+  );
+  const anzPaths = [...svg.querySelectorAll("#anz-land path")].map((path) =>
+    path.getAttribute("d"),
+  );
+  // combine() returns one interpolator per origin shape, each owning the slice of
+  // the destination it morphs into; join their output into one multi-subpath `d`.
+  const morphers = combine(originPaths, anzPaths.join(" "));
+  const morphToAnz = (t) => morphers.map((morph) => morph(t)).join(" ");
+  const originMorph = element("path", {
+    class: "anz-origin-morph",
+    fill: "none",
+    "vector-effect": "non-scaling-stroke",
+  });
+  svg.append(originMorph, ambientGroup, routesGroup, nodesGroup);
 
   // Each arriving city connects to one or two earlier cities. These are an aspirational motif, not past-work locations.
   const connections = [
@@ -222,7 +248,15 @@ export function initAnzBackground() {
     const still = motion.matches;
     const small = compact.matches;
     const morph = still ? 1 : smooth((value - 0.01) / 0.27);
-    const ambientOpacity = still ? 0 : 1 - smooth((value - 0.08) / 0.23);
+    // The old random ambient mesh is retired in favour of the origin-to-ANZ outline
+    // morph below; kept at 0 rather than removed so the dot/line network can be
+    // brought back later without rebuilding it.
+    const ambientOpacity = 0;
+    originMorph.setAttribute("d", morphToAnz(morph));
+    // Clearest at the start (the UK/Canada/Portugal outline on its own), settling to
+    // match the static coastline's resting opacity once the journey into ANZ completes.
+    const morphOpacity = still ? 0.27 : 0.27 + (1 - morph) * 0.28;
+    originMorph.style.opacity = morphOpacity.toFixed(3);
     const mouseX = ((pointer.x - bounds.left) / bounds.width) * map.width;
     const mouseY = ((pointer.y - bounds.top) / bounds.height) * map.height;
     const interactive =
