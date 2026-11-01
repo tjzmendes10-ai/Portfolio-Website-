@@ -261,6 +261,13 @@
   -webkit-mask: var(--ai-mask) center / contain no-repeat;
   mask: var(--ai-mask) center / contain no-repeat;
 }
+/* Claude Code's own image: shown as supplied, at the same height as the other marks. */
+.ai-image {
+  display: block;
+  width: var(--ai-logo);
+  height: var(--ai-logo);
+  object-fit: contain;
+}
 .ai-tool.is-text {
   padding: 0 9px;
   border: 1px solid currentColor;
