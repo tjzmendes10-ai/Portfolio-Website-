@@ -74,40 +74,51 @@ export function initAnzBackground() {
   const launchGroup = element("g", { class: "launch-labels" });
   svg.append(spokesGroup, routesGroup, nodesGroup, launchGroup);
 
-  // Each arriving city connects to one or two earlier cities. These are an aspirational motif, not past-work locations.
+  // Sydney is the hub, so every city links to it. Auckland is the NZ hub and also links to Melbourne, Brisbane and Perth.
+  // Each arriving city connects to earlier cities, listed as [arriving city, earlier city], grouped by arriving city. These are an aspirational motif, not past-work locations.
   const connections = [
     ["melbourne", "sydney"],
     ["brisbane", "sydney"],
     ["brisbane", "melbourne"],
     ["auckland", "sydney"],
     ["auckland", "brisbane"],
+    ["auckland", "melbourne"],
     ["perth", "melbourne"],
     ["perth", "sydney"],
+    ["perth", "auckland"],
     ["adelaide", "melbourne"],
     ["adelaide", "perth"],
+    ["adelaide", "sydney"],
     ["canberra", "sydney"],
     ["canberra", "melbourne"],
     ["wellington", "auckland"],
     ["wellington", "sydney"],
     ["christchurch", "wellington"],
     ["christchurch", "auckland"],
+    ["christchurch", "sydney"],
     ["queenstown", "christchurch"],
     ["queenstown", "wellington"],
+    ["queenstown", "auckland"],
+    ["queenstown", "sydney"],
     ["gold-coast", "sydney"],
     ["gold-coast", "auckland"],
     ["newcastle", "sydney"],
     ["newcastle", "brisbane"],
     ["wollongong", "canberra"],
     ["wollongong", "melbourne"],
+    ["wollongong", "sydney"],
     ["hobart", "melbourne"],
     ["hobart", "sydney"],
     ["darwin", "perth"],
     ["darwin", "brisbane"],
+    ["darwin", "sydney"],
   ].map((pair) =>
     pair.map((id) => map.cities.findIndex((city) => city.id === id)),
   );
   const routes = connections.map(([to, from], index) => {
-    const secondary = index > 0 && connections[index - 1][0] === to;
+    // Compact screens drop the extra links, but keep every Sydney link so the hub still reads.
+    const secondary =
+      index > 0 && connections[index - 1][0] === to && from !== 0;
     const group = element("g", {
       class: `anz-route-group${secondary ? " is-secondary" : ""}`,
     });
