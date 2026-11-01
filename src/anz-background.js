@@ -560,15 +560,21 @@ export function initAnzBackground() {
   const observer = new ResizeObserver(updateGeometry);
   observer.observe(stage);
   observer.observe(document.body);
-  // The timeline reads across the page, so the full-page map steps out of the way while any of it is on screen.
-  // A small still copy of the network sits in the section's empty left column instead, with no labels.
-  const journey = document.querySelector(".experience-section");
-  const journeyMap = document.querySelector(".journey-map");
-  if (journeyMap) {
-    // The outline asset defines #anz-land; renaming it keeps ids unique next to the full-page map.
-    journeyMap.innerHTML = outline.replaceAll("anz-land", "anz-land-mini");
+  // The approach steps and the timeline read across the page, so the full-page map steps out of the way while
+  // either is on screen. A small still copy of the network sits in each section's empty left column instead,
+  // with no labels; the one under the approach is drawn fainter so the Journey's stays the main moment.
+  const readingSections = [".approach-section", ".experience-section"]
+    .map((selector) => document.querySelector(selector))
+    .filter(Boolean);
+  document.querySelectorAll(".journey-map").forEach((journeyMap, copy) => {
+    // The outline asset defines #anz-land; renaming it keeps ids unique next to the full-page map and each other.
+    journeyMap.innerHTML = outline.replaceAll(
+      "anz-land",
+      `anz-land-mini-${copy}`,
+    );
     const mini = journeyMap.querySelector("svg");
     mini.setAttribute("class", "anz-map journey-network");
+    mini.setAttribute("preserveAspectRatio", "xMinYMin meet");
     // The extra room around the map lets the outbound arcs run off its edge without drawing other continents.
     mini.setAttribute("viewBox", "-100 -230 1200 910");
     const point = (index) => map.cities[index];
@@ -601,7 +607,7 @@ export function initAnzBackground() {
       { to: [170, -230], c1: [570, 60], c2: [360, -130] },
       { to: [1100, 110], c1: [800, 330], c2: [960, 190] },
     ].map(({ to, c1, c2 }, index) => {
-      const id = `journey-arc-${index}`;
+      const id = `journey-arc-${copy}-${index}`;
       const gradient = element("linearGradient", {
         id,
         gradientUnits: "userSpaceOnUse",
@@ -641,11 +647,17 @@ export function initAnzBackground() {
       }),
     );
     mini.append(...links, ...arcs, ...dots);
+  });
+  if ("IntersectionObserver" in window) {
+    const visible = new Set();
+    const watcher = new IntersectionObserver((entries) => {
+      entries.forEach(({ target, isIntersecting }) =>
+        isIntersecting ? visible.add(target) : visible.delete(target),
+      );
+      layer.classList.toggle("is-hidden", visible.size > 0);
+    });
+    readingSections.forEach((section) => watcher.observe(section));
   }
-  if (journey && "IntersectionObserver" in window)
-    new IntersectionObserver(([entry]) =>
-      layer.classList.toggle("is-hidden", entry.isIntersecting),
-    ).observe(journey);
   updateGeometry();
   progress = motion.matches ? 1 : targetProgress;
   sync();
