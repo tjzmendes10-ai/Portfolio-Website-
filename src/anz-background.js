@@ -569,8 +569,13 @@ export function initAnzBackground() {
     journeyMap.innerHTML = outline.replaceAll("anz-land", "anz-land-mini");
     const mini = journeyMap.querySelector("svg");
     mini.setAttribute("class", "anz-map journey-network");
+    // The extra room around the map lets the outbound arcs run off its edge without drawing other continents.
+    mini.setAttribute("viewBox", "-100 -230 1200 910");
     const point = (index) => map.cities[index];
-    const links = connections.map(([to, from], index) => {
+    // Fewer, fainter internal links, so the three outbound arcs stand out: keep the first link per city and every Sydney link.
+    const links = connections.flatMap(([to, from], index) => {
+      if (index > 0 && connections[index - 1][0] === to && from !== 0)
+        return [];
       const a = point(from),
         b = point(to);
       const dx = b.x - a.x,
@@ -579,10 +584,51 @@ export function initAnzBackground() {
       const bow = Math.min(42, distance * 0.13) * (index % 2 ? -1 : 1);
       const cx = (a.x + b.x) / 2 - (dy / distance) * bow;
       const cy = (a.y + b.y) / 2 + (dx / distance) * bow;
+      return [
+        element("path", {
+          d: `M${a.x},${a.y} Q${cx.toFixed(2)},${cy.toFixed(2)} ${b.x},${b.y}`,
+          fill: "none",
+          class: "journey-route",
+          "vector-effect": "non-scaling-stroke",
+        }),
+      ];
+    });
+    // Two arcs leave off the top-left (towards the UK and Europe) and one off the right (towards North America).
+    // Each fades to nothing before the edge, so it suggests distance rather than a destination.
+    const sydney = point(0);
+    const arcs = [
+      { to: [-100, -110], c1: [440, 170], c2: [140, -30] },
+      { to: [170, -230], c1: [570, 60], c2: [360, -130] },
+      { to: [1100, 110], c1: [800, 330], c2: [960, 190] },
+    ].map(({ to, c1, c2 }, index) => {
+      const id = `journey-arc-${index}`;
+      const gradient = element("linearGradient", {
+        id,
+        gradientUnits: "userSpaceOnUse",
+        x1: sydney.x,
+        y1: sydney.y,
+        x2: to[0],
+        y2: to[1],
+      });
+      [
+        [0, 0.75],
+        [0.55, 0.35],
+        [1, 0],
+      ].forEach(([offset, opacity]) =>
+        gradient.append(
+          element("stop", {
+            offset,
+            "stop-color": "#34d399",
+            "stop-opacity": opacity,
+          }),
+        ),
+      );
+      mini.querySelector("defs").append(gradient);
       return element("path", {
-        d: `M${a.x},${a.y} Q${cx.toFixed(2)},${cy.toFixed(2)} ${b.x},${b.y}`,
+        d: `M${sydney.x},${sydney.y} C${c1} ${c2} ${to}`,
         fill: "none",
-        class: "journey-route",
+        stroke: `url(#${id})`,
+        class: "journey-arc",
         "vector-effect": "non-scaling-stroke",
       });
     });
@@ -590,11 +636,11 @@ export function initAnzBackground() {
       element("circle", {
         cx: city.x,
         cy: city.y,
-        r: city.minor ? 3 : 4,
+        r: city.minor ? 3.5 : 4.5,
         class: "journey-city",
       }),
     );
-    mini.append(...links, ...dots);
+    mini.append(...links, ...arcs, ...dots);
   }
   if (journey && "IntersectionObserver" in window)
     new IntersectionObserver(([entry]) =>

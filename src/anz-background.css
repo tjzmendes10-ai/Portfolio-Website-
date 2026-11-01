@@ -41,16 +41,20 @@ body {
 }
 /* A small still copy of the network for the Journey section's left column. */
 .journey-map {
-  margin-top: 36px;
-  max-width: 400px;
+  margin-top: 14px;
 }
 .journey-network {
-  --outline-opacity: 0.45;
+  --outline-opacity: 0.4;
+  overflow: hidden;
 }
 .journey-route {
   stroke: #34d399;
-  stroke-width: 0.8;
-  stroke-opacity: 0.45;
+  stroke-width: 0.7;
+  stroke-opacity: 0.26;
+  stroke-linecap: round;
+}
+.journey-arc {
+  stroke-width: 1.2;
   stroke-linecap: round;
 }
 .journey-city {
