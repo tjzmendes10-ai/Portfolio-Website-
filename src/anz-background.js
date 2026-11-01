@@ -560,104 +560,13 @@ export function initAnzBackground() {
   const observer = new ResizeObserver(updateGeometry);
   observer.observe(stage);
   observer.observe(document.body);
-  // The approach steps and the timeline read across the page, so the full-page map steps out of the way while
-  // either is on screen. A small still copy of the network sits in each section's empty left column instead,
-  // with no labels; the one under the approach is drawn fainter so the Journey's stays the main moment.
-  const readingSections = [".approach-section", ".experience-section"]
-    .map((selector) => document.querySelector(selector))
-    .filter(Boolean);
-  document.querySelectorAll(".journey-map").forEach((journeyMap, copy) => {
-    // The outline asset defines #anz-land; renaming it keeps ids unique next to the full-page map and each other.
-    journeyMap.innerHTML = outline.replaceAll(
-      "anz-land",
-      `anz-land-mini-${copy}`,
-    );
-    const mini = journeyMap.querySelector("svg");
-    mini.setAttribute("class", "anz-map journey-network");
-    mini.setAttribute("preserveAspectRatio", "xMinYMin meet");
-    // The extra room around the map lets the outbound arcs run off its edge without drawing other continents.
-    mini.setAttribute("viewBox", "-100 -230 1200 910");
-    const point = (index) => map.cities[index];
-    // Fewer, fainter internal links, so the three outbound arcs stand out: keep the first link per city and every Sydney link.
-    const links = connections.flatMap(([to, from], index) => {
-      if (index > 0 && connections[index - 1][0] === to && from !== 0)
-        return [];
-      const a = point(from),
-        b = point(to);
-      const dx = b.x - a.x,
-        dy = b.y - a.y;
-      const distance = Math.max(1, Math.hypot(dx, dy));
-      const bow = Math.min(42, distance * 0.13) * (index % 2 ? -1 : 1);
-      const cx = (a.x + b.x) / 2 - (dy / distance) * bow;
-      const cy = (a.y + b.y) / 2 + (dx / distance) * bow;
-      return [
-        element("path", {
-          d: `M${a.x},${a.y} Q${cx.toFixed(2)},${cy.toFixed(2)} ${b.x},${b.y}`,
-          fill: "none",
-          class: "journey-route",
-          "vector-effect": "non-scaling-stroke",
-        }),
-      ];
-    });
-    // Two arcs leave off the top-left (towards the UK and Europe) and one off the right (towards North America).
-    // Each fades to nothing before the edge, so it suggests distance rather than a destination.
-    const sydney = point(0);
-    const arcs = [
-      { to: [-100, -110], c1: [440, 170], c2: [140, -30] },
-      { to: [170, -230], c1: [570, 60], c2: [360, -130] },
-      { to: [1100, 110], c1: [800, 330], c2: [960, 190] },
-    ].map(({ to, c1, c2 }, index) => {
-      const id = `journey-arc-${copy}-${index}`;
-      const gradient = element("linearGradient", {
-        id,
-        gradientUnits: "userSpaceOnUse",
-        x1: sydney.x,
-        y1: sydney.y,
-        x2: to[0],
-        y2: to[1],
-      });
-      [
-        [0, 0.75],
-        [0.55, 0.35],
-        [1, 0],
-      ].forEach(([offset, opacity]) =>
-        gradient.append(
-          element("stop", {
-            offset,
-            "stop-color": "#34d399",
-            "stop-opacity": opacity,
-          }),
-        ),
-      );
-      mini.querySelector("defs").append(gradient);
-      return element("path", {
-        d: `M${sydney.x},${sydney.y} C${c1} ${c2} ${to}`,
-        fill: "none",
-        stroke: `url(#${id})`,
-        class: "journey-arc",
-        "vector-effect": "non-scaling-stroke",
-      });
-    });
-    const dots = map.cities.map((city) =>
-      element("circle", {
-        cx: city.x,
-        cy: city.y,
-        r: city.minor ? 3.5 : 4.5,
-        class: "journey-city",
-      }),
-    );
-    mini.append(...links, ...arcs, ...dots);
-  });
-  if ("IntersectionObserver" in window) {
-    const visible = new Set();
-    const watcher = new IntersectionObserver((entries) => {
-      entries.forEach(({ target, isIntersecting }) =>
-        isIntersecting ? visible.add(target) : visible.delete(target),
-      );
-      layer.classList.toggle("is-hidden", visible.size > 0);
-    });
-    readingSections.forEach((section) => watcher.observe(section));
-  }
+  // The timeline reads across the map, so the map steps back while it is in view.
+  const journey = document.querySelector(".experience-section");
+  if (journey && "IntersectionObserver" in window)
+    new IntersectionObserver(
+      ([entry]) => layer.classList.toggle("is-quiet", entry.isIntersecting),
+      { rootMargin: "-30% 0px -30% 0px" },
+    ).observe(journey);
   updateGeometry();
   progress = motion.matches ? 1 : targetProgress;
   sync();
