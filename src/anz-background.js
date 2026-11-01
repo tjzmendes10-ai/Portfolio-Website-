@@ -560,12 +560,45 @@ export function initAnzBackground() {
   const observer = new ResizeObserver(updateGeometry);
   observer.observe(stage);
   observer.observe(document.body);
-  // The timeline reads across the map, so the map steps back while it is in view.
+  // The timeline reads across the page, so the full-page map steps out of the way while any of it is on screen.
+  // A small still copy of the network sits in the section's empty left column instead, with no labels.
   const journey = document.querySelector(".experience-section");
+  const journeyMap = document.querySelector(".journey-map");
+  if (journeyMap) {
+    // The outline asset defines #anz-land; renaming it keeps ids unique next to the full-page map.
+    journeyMap.innerHTML = outline.replaceAll("anz-land", "anz-land-mini");
+    const mini = journeyMap.querySelector("svg");
+    mini.setAttribute("class", "anz-map journey-network");
+    const point = (index) => map.cities[index];
+    const links = connections.map(([to, from], index) => {
+      const a = point(from),
+        b = point(to);
+      const dx = b.x - a.x,
+        dy = b.y - a.y;
+      const distance = Math.max(1, Math.hypot(dx, dy));
+      const bow = Math.min(42, distance * 0.13) * (index % 2 ? -1 : 1);
+      const cx = (a.x + b.x) / 2 - (dy / distance) * bow;
+      const cy = (a.y + b.y) / 2 + (dx / distance) * bow;
+      return element("path", {
+        d: `M${a.x},${a.y} Q${cx.toFixed(2)},${cy.toFixed(2)} ${b.x},${b.y}`,
+        fill: "none",
+        class: "journey-route",
+        "vector-effect": "non-scaling-stroke",
+      });
+    });
+    const dots = map.cities.map((city) =>
+      element("circle", {
+        cx: city.x,
+        cy: city.y,
+        r: city.minor ? 3 : 4,
+        class: "journey-city",
+      }),
+    );
+    mini.append(...links, ...dots);
+  }
   if (journey && "IntersectionObserver" in window)
-    new IntersectionObserver(
-      ([entry]) => layer.classList.toggle("is-quiet", entry.isIntersecting),
-      { rootMargin: "-30% 0px -30% 0px" },
+    new IntersectionObserver(([entry]) =>
+      layer.classList.toggle("is-hidden", entry.isIntersecting),
     ).observe(journey);
   updateGeometry();
   progress = motion.matches ? 1 : targetProgress;
