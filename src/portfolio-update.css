@@ -514,3 +514,85 @@
     font-size: 18px;
   }
 }
+
+/* 04 / The person: the map stays, but each block of copy sits on a dark panel in front of it, so lines, dots and the outline stay faint behind the text. */
+.about-heading > div {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  padding: 26px 34px 30px;
+  background: #081b17eb;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+.about-heading > div > h2 {
+  margin: 0;
+}
+.learning-column {
+  padding: 28px 32px 30px;
+  background: #081b17eb;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+.learning-item {
+  padding-right: 43px;
+}
+/* The intro reads as part of the heading: directly beneath it, left-aligned, larger and brighter. */
+.about-heading > div > p {
+  max-width: 52ch;
+  margin: 22px 0 0;
+  font-size: 17px;
+  line-height: 1.7;
+  color: #c3d8ca;
+  text-wrap: pretty;
+}
+.about-grid p,
+.about-grid h3 {
+  text-wrap: pretty;
+}
+.about-grid h3 {
+  text-wrap: balance;
+}
+/* Brighter body text and labels, to stay comfortably above WCAG AA (4.5:1) even on the lighter part of the van card. */
+.van-copy p {
+  max-width: 46ch;
+  color: #b9d5c6;
+}
+.van-top .small-label,
+.van-caption {
+  color: #a9ccb8;
+}
+.learning-item > p:last-child {
+  max-width: 54ch;
+  color: #b3cabc;
+}
+.learning-item .small-label,
+.outside-work .small-label {
+  color: #8fc4a5;
+}
+.learning-icon {
+  color: #8fc4a5;
+}
+.outside-work p {
+  max-width: 48ch;
+  font-size: 12px;
+  color: #b3cabc;
+}
+@media (max-width: 600px) {
+  .about-heading > div {
+    padding: 20px 20px 24px;
+  }
+  .learning-column {
+    padding: 22px 20px 24px;
+  }
+  .learning-item {
+    padding-right: 30px;
+  }
+  .about-heading > div > p {
+    font-size: 15px;
+    margin-top: 20px;
+  }
+  .outside-work p {
+    font-size: 12px;
+  }
+}
