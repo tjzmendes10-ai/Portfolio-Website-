@@ -347,3 +347,23 @@ body {
     display: none;
   }
 }
+
+/* Quieter than the two number boxes: text only, with a tiny "Opened" tag above each market. */
+.launch-label {
+  font-family: "DM Sans", sans-serif;
+  text-anchor: start;
+}
+.launch-label.is-left {
+  text-anchor: end;
+}
+.launch-tag {
+  fill: #8fb9a1;
+  font-size: 5.4px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.launch-name {
+  fill: #b6dcc8;
+  font-size: 9px;
+  letter-spacing: 0.03em;
+}

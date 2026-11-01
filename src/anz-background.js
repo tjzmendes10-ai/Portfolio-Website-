@@ -71,7 +71,8 @@ export function initAnzBackground() {
   const routesGroup = element("g", { class: "anz-routes" });
   const nodesGroup = element("g", { class: "anz-cities" });
   const spokesGroup = element("g", { class: "europe-spokes" });
-  svg.append(spokesGroup, routesGroup, nodesGroup);
+  const launchGroup = element("g", { class: "launch-labels" });
+  svg.append(spokesGroup, routesGroup, nodesGroup, launchGroup);
 
   // Each arriving city connects to one or two earlier cities. These are an aspirational motif, not past-work locations.
   const connections = [
@@ -221,6 +222,38 @@ export function initAnzBackground() {
     }
     return { ...city, ...parts, source, label, hubLabel, index };
   });
+  // Launch labels sit on the map in SVG units, so they scale and resize with it. `side` is which way the
+  // text runs from its dot; `lift` nudges it up where neighbouring dots or spokes would run through it.
+  const launches = [
+    { id: "oslo", text: "Norway", side: 1, lift: 0 },
+    { id: "athens", text: "Greece", side: 1, lift: 20 },
+    { id: "berlin", text: "Germany · property", side: 1, lift: 16 },
+    { id: "bremen", text: "Renewable energy", side: -1, lift: 14 },
+    { id: "reykjavik", text: "Iceland", side: 1, lift: -12 },
+  ].map(({ id, text, side, lift }) => {
+    const city = europe.cities.find((entry) => entry.id === id);
+    const spoke = spokes.find((entry) => entry.city === city);
+    const x = city.x + side * 11;
+    const label = element("text", {
+      x,
+      y: city.y - lift,
+      class: `launch-label${side < 0 ? " is-left" : ""}`,
+      opacity: 0,
+    });
+    const tag = element("tspan", { class: "launch-tag" });
+    tag.textContent = "Opened";
+    const name = element("tspan", {
+      class: "launch-name",
+      x,
+      dy: 9,
+    });
+    name.textContent = text;
+    label.append(tag, name);
+    launchGroup.append(label);
+    // Appear just after the spoke has finished drawing to the dot.
+    return { label, appears: spoke.start + spokeLength + 0.1 };
+  });
+
   const landing = new Map(cities.map((city) => [city.source, city]));
   const leftovers = europe.cities
     .filter((city) => !city.target)
@@ -291,6 +324,13 @@ export function initAnzBackground() {
         `M${hubPosition.x.toFixed(2)},${hubPosition.y.toFixed(2)} L${mix(hubPosition.x, end.x, amount).toFixed(2)},${mix(hubPosition.y, end.y, amount).toFixed(2)}`,
       );
       line.setAttribute("opacity", (amount * spokeFade).toFixed(3));
+    });
+
+    // Labels leave with the spokes, long before the dots reach Australia. Compact screens show a text line instead.
+    launches.forEach(({ label, appears }) => {
+      const shown =
+        still || small ? 0 : smooth((seconds - appears) / 0.35) * spokeFade;
+      label.setAttribute("opacity", shown.toFixed(3));
     });
 
     const pulse = (dot, size) => {

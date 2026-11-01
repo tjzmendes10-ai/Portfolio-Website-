@@ -200,9 +200,13 @@ const europeOrder = [
   "Athens",
   "Cluj-Napoca",
   "Budapest",
+  "Bremen",
 ];
 // Natural Earth 1:50m may omit smaller cities, so any missing one uses its published coordinates.
-const europeSupplemental = { "Cluj-Napoca": [23.5899, 46.7712] };
+const europeSupplemental = {
+  "Cluj-Napoca": [23.5899, 46.7712],
+  Bremen: [8.8017, 53.0793],
+};
 // Natural Earth lists some cities by local name; match on its ASCII name, with an alias for the English one.
 const europeAliases = { Copenhagen: "Kobenhavn" };
 const inEurope = ([lon, lat]) => lon > -30 && lon < 45 && lat > 34 && lat < 72;
@@ -294,15 +298,19 @@ const normaliser = (points) => {
 };
 const europeNorm = europeCities.map(normaliser(europeCities));
 const anzNorm = cities.map(normaliser(cities));
+// Bremen has no ANZ counterpart (it only carries a launch label), so it is never matched and always fades out.
+const unmatched = new Set(["Bremen"]);
 const cost = (europeIndex, anzIndex) =>
-  europeIndex === 0 || anzIndex === 0
-    ? europeIndex === anzIndex
-      ? 0
-      : 1e6
-    : Math.hypot(
-        europeNorm[europeIndex][0] - anzNorm[anzIndex][0],
-        europeNorm[europeIndex][1] - anzNorm[anzIndex][1],
-      ) ** 2;
+  unmatched.has(europeCities[europeIndex].name)
+    ? 1e6
+    : europeIndex === 0 || anzIndex === 0
+      ? europeIndex === anzIndex
+        ? 0
+        : 1e6
+      : Math.hypot(
+          europeNorm[europeIndex][0] - anzNorm[anzIndex][0],
+          europeNorm[europeIndex][1] - anzNorm[anzIndex][1],
+        ) ** 2;
 // slots[anzIndex] = europe index. Start with London first, then improve by swapping until stable.
 const slots = europeCities.map((_, index) => index);
 for (let improved = true; improved;) {
