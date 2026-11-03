@@ -48,6 +48,10 @@
   stroke: var(--mint);
   stroke-opacity: 1;
 }
+.pl-outline {
+  stroke: var(--teal);
+  stroke-opacity: 0.55;
+}
 .pl-leader {
   stroke: var(--teal);
   stroke-opacity: 0.45;
@@ -203,4 +207,20 @@
 }
 .nb {
   white-space: nowrap;
+}
+
+/* Map behind the diagram: softened and dimmed, the same way it steps back behind the journey timeline. */
+.anz-background.is-blurred .anz-map-stage {
+  opacity: 0.65;
+  filter: blur(3px);
+}
+.anz-background .anz-map-stage {
+  transition:
+    opacity 0.6s ease,
+    filter 0.6s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .anz-background .anz-map-stage {
+    transition: none;
+  }
 }

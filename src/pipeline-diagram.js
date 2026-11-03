@@ -9,6 +9,7 @@ const clamp = (value) => Math.max(0, Math.min(1, value));
 export function initPipelineDiagram() {
   const figure = document.querySelector(".pipeline");
   if (!figure) return;
+  blurMapBehind(figure);
   const still = window.matchMedia("(prefers-reduced-motion: reduce)");
   if (still.matches || !("IntersectionObserver" in window)) return;
 
@@ -73,4 +74,14 @@ function play(figure) {
     figure.classList.add("is-done");
   };
   requestAnimationFrame(frame);
+}
+
+// The map steps back and softens while the diagram is in view, so the discs and labels read cleanly.
+function blurMapBehind(figure) {
+  const layer = document.querySelector("#anz-background");
+  if (!layer || !("IntersectionObserver" in window)) return;
+  new IntersectionObserver(
+    ([entry]) => layer.classList.toggle("is-blurred", entry.isIntersecting),
+    { rootMargin: "-15% 0px -15% 0px" },
+  ).observe(figure.closest(".pipeline-wrap") || figure);
 }
