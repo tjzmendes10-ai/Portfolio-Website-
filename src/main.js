@@ -1,9 +1,11 @@
 import "./style.css";
 import { initAnzBackground } from "./anz-background.js";
 import "./portfolio-update.css";
+import "./pipeline-diagram.css";
 import { initCounters, initTomChat } from "./portfolio-interactions.js";
 import { initAiTools } from "./ai-tools.js";
 import { initAnzTextScrim } from "./anz-text-scrim.js";
+import { initPipelineDiagram } from "./pipeline-diagram.js";
 
 document.querySelector("#year").textContent = new Date().getFullYear();
 const sydneyClock = document.querySelector("#sydney-time");
@@ -66,3 +68,4 @@ initAnzTextScrim();
 initAiTools();
 initCounters();
 initTomChat();
+initPipelineDiagram();

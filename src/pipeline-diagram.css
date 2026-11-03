@@ -1,0 +1,160 @@
+/* Bow-tie pipeline diagram: a funnel that narrows to the close, then widens for expansion. */
+.pipeline-wrap {
+  position: relative;
+  margin-top: 84px;
+  padding-top: 56px;
+  border-top: 1px solid #a9d1b52b;
+}
+.pipeline {
+  margin: 0;
+}
+.pipeline-title {
+  font-size: clamp(28px, 2.7vw, 38px);
+  line-height: 1.17;
+  letter-spacing: -0.05em;
+  margin: 0;
+}
+.pipeline-title span {
+  color: #b5dac1;
+}
+.pipeline-visual {
+  margin-top: 48px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) 0.7fr repeat(3, 1fr);
+}
+.pipeline-svg {
+  display: block;
+  overflow: visible;
+  stroke-width: 0.9;
+}
+.pipeline-svg-wide {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: auto;
+}
+.pipeline-svg-tall {
+  display: none;
+  stroke-width: 1.2;
+}
+.pl-side {
+  stroke: var(--teal);
+  stroke-opacity: 0.55;
+}
+.pl-ring {
+  stroke: var(--teal);
+  stroke-opacity: 0.9;
+}
+.pl-knot {
+  stroke: var(--mint);
+  stroke-opacity: 1;
+}
+.pl-axis {
+  stroke: var(--line);
+  stroke-dasharray: 2 5;
+}
+.pl-node {
+  fill: var(--mint);
+  stroke: none;
+  opacity: 0.75;
+}
+.pl-node-knot {
+  opacity: 1;
+}
+.pl-track {
+  stroke: none;
+  fill: none;
+}
+.pl-dot {
+  fill: var(--mint);
+  stroke: none;
+}
+.pl-dot-main {
+  opacity: 0;
+}
+.pipeline-labels {
+  display: contents;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pipeline-labels li {
+  padding: 16px 7px 0;
+  text-align: center;
+}
+.pl-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 550;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pl-desc {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #9cb5a5;
+}
+.pl-close .pl-label {
+  color: var(--mint);
+}
+
+/* Draw-in. Only armed by pipeline-diagram.js when motion is allowed; otherwise the finished diagram shows. */
+.pipeline.is-armed .pl-draw {
+  opacity: 0;
+  stroke-linecap: butt;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.pipeline.is-armed .pl-axis,
+.pipeline.is-armed .pl-node,
+.pipeline.is-armed .pl-dot {
+  opacity: 0;
+}
+.pipeline.is-playing .pl-draw {
+  opacity: 1;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s ease-in-out calc(var(--i, 0) * 90ms);
+}
+.pipeline.is-playing .pl-axis {
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+.pipeline.is-playing .pl-node {
+  opacity: 0.75;
+  transition: opacity 0.5s ease 0.7s;
+}
+.pipeline.is-playing .pl-node-knot {
+  opacity: 1;
+}
+
+@media (max-width: 850px) {
+  .pipeline-wrap {
+    margin-top: 64px;
+    padding-top: 44px;
+  }
+  .pipeline-visual {
+    margin-top: 36px;
+    grid-template-columns: 110px 1fr;
+    grid-template-rows: repeat(4, 84px) 56px repeat(3, 84px);
+    column-gap: 18px;
+  }
+  .pipeline-svg-wide {
+    display: none;
+  }
+  .pipeline-svg-tall {
+    display: block;
+    grid-column: 1;
+    grid-row: 1 / -1;
+    width: 110px;
+    height: 644px;
+  }
+  .pipeline-labels li {
+    grid-column: 2;
+    align-self: center;
+    padding: 0;
+    text-align: left;
+  }
+}
