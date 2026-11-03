@@ -60,8 +60,18 @@ const tall = {
 
 const n = (value) => String(Math.round(value * 100) / 100);
 const lerp = (from, to, t) => from + (to - from) * t;
-// Dots that fan out of Close head along these shares of the right-hand cone's half-size.
-const fan = [-0.5, 0, 0.5];
+// The travelling dots: three enter, one drops out at Qualify, the other two pass through Close,
+// then each splits at Expand so four run out past Reference and fade. `k` is a dot's lane as a share of the
+// cone's half-size at that stop: [start, Qualify, Close, Expand, end].
+const QUALIFY = stages.findIndex((stage) => stage.name === "Qualify");
+const EXPAND = stages.findIndex((stage) => stage.name === "Expand");
+const flow = [
+  { k: [-0.6, -0.55, -0.3, -0.3, -0.65], from: "start", until: "end" }, // top lane, runs the whole way
+  { k: [0, 0, 0, 0, 0], from: "start", until: "qualify" }, // middle lane, drops out at Qualify
+  { k: [0.6, 0.55, 0.3, 0.3, 0.65], from: "start", until: "end" }, // bottom lane, runs the whole way
+  { k: [-0.3, -0.3, -0.3, -0.3, -0.22], from: "expand", until: "end" }, // splits off the top lane at Expand
+  { k: [0.3, 0.3, 0.3, 0.3, 0.22], from: "expand", until: "end" }, // splits off the bottom lane at Expand
+];
 const labelSide = (i) => {
   if (stages[i].text === null) return null;
   const order = stages.slice(0, i).filter((stage) => stage.text !== null).length;
@@ -81,13 +91,30 @@ function cones({ at, depth, first, close, last }) {
     const line = i < CLOSE ? left : right;
     return [line(at(i)), line(at(i) + depth)];
   };
-  return { left, right, faces };
+  // The cone's half-size at any position along the axis (the lines run on past both ends).
+  const profile = (position) =>
+    position <= at(CLOSE) ? left(position) : position < at(CLOSE) + depth ? close : right(position);
+  return { left, right, faces, profile };
+}
+
+// Keyframes the browser animates. Each dot has [position along the axis, position across it] stops, and a
+// trapezoid of axis positions [fade in starts, fully in, starts fading out, gone] that says when it shows.
+function dotFlow({ start, end, stops, lastFace, centre, profile }) {
+  const [qualify, close, expand] = stops;
+  const round = (value) => Math.round(value * 100) / 100;
+  const positions = [start, qualify, close, expand, end];
+  const appears = { start: [start, start + 40], expand: [expand - 10, expand + 10] };
+  return flow.map((dot) => ({
+    keys: positions.map((position, j) => [round(position), round(centre + dot.k[j] * profile(position))]),
+    // Dots on a lane to the end fade out after the last disc; the middle one fades at Qualify.
+    show: [...appears[dot.from], ...(dot.until === "end" ? [lastFace, end] : [qualify - 20, qualify + 10])].map(round),
+  }));
 }
 
 function wideSvg() {
   const { centreY: cy, depth: d } = wide;
   const x = (i) => wide.firstX + wide.pitch * i;
-  const { right, faces } = cones({
+  const { profile, faces } = cones({
     at: x,
     depth: d,
     first: wide.firstHeight,
@@ -95,6 +122,7 @@ function wideSvg() {
     last: wide.lastHeight,
   });
   const out = [];
+  let flowData;
   stages.forEach((stage, i) => {
     const [front, back] = faces(i);
     const [rf, rb] = [front * wide.faceRatio, back * wide.faceRatio];
@@ -125,28 +153,28 @@ function wideSvg() {
     }
     out.push("</g>");
   });
-  // Paths the travelling dot follows: along the centre line to Close, then three dots fan out past the last disc.
+  // The travelling dots (see `flow`): hidden at rest, animated by pipeline-diagram.js.
   const end = wide.width + wide.tail;
-  out.push(`<path class="pl-track" data-track="main" d="M8 ${cy}L${n(x(CLOSE))} ${cy}" />`);
-  for (const share of fan) {
-    const points = [x(CLOSE), x(CLOSE + 1), x(CLOSE + 2), x(LAST), end].map((px) => [
-      px,
-      cy + share * right(px) * Math.min(1, (px - x(CLOSE)) / wide.pitch),
-    ]);
-    out.push(
-      `<path class="pl-track" data-track="fan" d="${points.map(([px, py], j) => `${j ? "L" : "M"}${n(px)} ${n(py)}`).join("")}" />`,
-    );
-  }
-  out.push(`<circle class="pl-dot pl-dot-main" cx="8" cy="${cy}" r="2.6" />`);
-  fan.forEach(() => out.push(`<circle class="pl-dot pl-dot-fan" cx="${n(x(CLOSE))}" cy="${cy}" r="2.6" />`));
-  return `<svg class="pipeline-svg pipeline-svg-wide" viewBox="0 0 ${wide.width} ${wide.height}" fill="none" stroke-linecap="round" focusable="false" aria-hidden="true">\n${out.map((line) => `  ${line}`).join("\n")}\n</svg>`;
+  const dots = dotFlow({
+    start: 8,
+    end,
+    stops: [x(QUALIFY), x(CLOSE), x(EXPAND)],
+    lastFace: x(LAST) + d,
+    centre: cy,
+    profile,
+  });
+  flow.forEach((_, j) =>
+    out.push(`<circle class="pl-dot" data-dot="${j}" cx="8" cy="${cy}" r="2.6" />`),
+  );
+  flowData = JSON.stringify({ axis: "x", start: 8, end, dots });
+  return `<svg class="pipeline-svg pipeline-svg-wide" data-flow='${flowData}' viewBox="0 0 ${wide.width} ${wide.height}" fill="none" stroke-linecap="round" focusable="false" aria-hidden="true">\n${out.map((line) => `  ${line}`).join("\n")}\n</svg>`;
 }
 
 function tallSvg() {
   const { centreX: cx, depth: t, rowHeight: row } = tall;
   const height = row * stages.length;
   const y = (i) => row * i + row / 2 - 3;
-  const { right, faces } = cones({
+  const { profile, faces } = cones({
     at: y,
     depth: t,
     first: tall.firstHalfWidth,
@@ -181,19 +209,19 @@ function tallSvg() {
     out.push("</g>");
   });
   const end = height + tall.tail;
-  out.push(`<path class="pl-track" data-track="main" d="M${cx} 4L${cx} ${n(y(CLOSE))}" />`);
-  for (const share of fan) {
-    const points = [y(CLOSE), y(CLOSE + 1), y(CLOSE + 2), y(LAST), end].map((py) => [
-      cx + share * right(py) * Math.min(1, (py - y(CLOSE)) / row),
-      py,
-    ]);
-    out.push(
-      `<path class="pl-track" data-track="fan" d="${points.map(([px, py], j) => `${j ? "L" : "M"}${n(px)} ${n(py)}`).join("")}" />`,
-    );
-  }
-  out.push(`<circle class="pl-dot pl-dot-main" cx="${cx}" cy="4" r="3" />`);
-  fan.forEach(() => out.push(`<circle class="pl-dot pl-dot-fan" cx="${cx}" cy="${n(y(CLOSE))}" r="3" />`));
-  return `<svg class="pipeline-svg pipeline-svg-tall" viewBox="0 0 ${tall.width} ${height}" width="${tall.width}" height="${height}" fill="none" stroke-linecap="round" focusable="false" aria-hidden="true">\n${out.map((line) => `  ${line}`).join("\n")}\n</svg>`;
+  const dots = dotFlow({
+    start: 4,
+    end,
+    stops: [y(QUALIFY), y(CLOSE), y(EXPAND)],
+    lastFace: y(LAST) + t,
+    centre: cx,
+    profile,
+  });
+  flow.forEach((_, j) =>
+    out.push(`<circle class="pl-dot" data-dot="${j}" cx="${cx}" cy="4" r="3" />`),
+  );
+  const flowData = JSON.stringify({ axis: "y", start: 4, end, dots });
+  return `<svg class="pipeline-svg pipeline-svg-tall" data-flow='${flowData}' viewBox="0 0 ${tall.width} ${height}" width="${tall.width}" height="${height}" fill="none" stroke-linecap="round" focusable="false" aria-hidden="true">\n${out.map((line) => `  ${line}`).join("\n")}\n</svg>`;
 }
 
 function block() {

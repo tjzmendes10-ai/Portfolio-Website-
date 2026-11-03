@@ -61,10 +61,6 @@
   stroke: none;
   opacity: 0.8;
 }
-.pl-track {
-  stroke: none;
-  fill: none;
-}
 /* The dots only exist while they travel (pipeline-diagram.js sets their opacity); at rest none are shown. */
 .pl-dot {
   fill: var(--mint);
