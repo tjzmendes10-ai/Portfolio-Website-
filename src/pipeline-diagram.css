@@ -1,4 +1,4 @@
-/* Bow-tie pipeline diagram: a funnel that narrows to the close, then widens for expansion. */
+/* Pipeline diagram: a row of 3D discs that shrinks to the close, then grows again for expansion. */
 .pipeline-wrap {
   position: relative;
   margin-top: 84px;
@@ -9,18 +9,14 @@
   margin: 0;
 }
 .pipeline-title {
-  font-size: clamp(28px, 2.7vw, 38px);
-  line-height: 1.17;
-  letter-spacing: -0.05em;
+  font-size: clamp(22px, 2.1vw, 30px);
+  line-height: 1.2;
+  letter-spacing: -0.045em;
   margin: 0;
 }
-.pipeline-title span {
-  color: #b5dac1;
-}
 .pipeline-visual {
-  margin-top: 48px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr) 0.7fr repeat(3, 1fr);
+  position: relative;
+  margin-top: 40px;
 }
 .pipeline-svg {
   display: block;
@@ -28,37 +24,38 @@
   stroke-width: 0.9;
 }
 .pipeline-svg-wide {
-  grid-column: 1 / -1;
   width: 100%;
   height: auto;
 }
 .pipeline-svg-tall {
   display: none;
-  stroke-width: 1.2;
+  stroke-width: 1.1;
 }
-.pl-side {
+/* Solid look without gradients: a dark body, an opaque face, then a faint lighter tint over the face. */
+.pl-body,
+.pl-face {
+  fill: var(--surface);
   stroke: var(--teal);
-  stroke-opacity: 0.55;
+  stroke-opacity: 0.85;
 }
-.pl-ring {
-  stroke: var(--teal);
-  stroke-opacity: 0.9;
+.pl-face-tint {
+  fill: var(--mint);
+  fill-opacity: 0.07;
+  stroke: none;
 }
-.pl-knot {
+.pl-disc-knot .pl-body,
+.pl-disc-knot .pl-face {
   stroke: var(--mint);
   stroke-opacity: 1;
 }
-.pl-axis {
-  stroke: var(--line);
-  stroke-dasharray: 2 5;
+.pl-leader {
+  stroke: var(--teal);
+  stroke-opacity: 0.45;
 }
-.pl-node {
+.pl-pin {
   fill: var(--mint);
   stroke: none;
-  opacity: 0.75;
-}
-.pl-node-knot {
-  opacity: 1;
+  opacity: 0.8;
 }
 .pl-track {
   stroke: none;
@@ -71,15 +68,57 @@
 .pl-dot-main {
   opacity: 0;
 }
+.pl-num-text {
+  fill: var(--muted);
+  font-family: "DM Sans", sans-serif;
+  font-size: 9px;
+  font-weight: 550;
+  letter-spacing: 0.1em;
+}
+.pl-num-text.pl-num-close {
+  fill: var(--mint);
+  font-size: 6.4px;
+  letter-spacing: 0.12em;
+}
+
+/* Horizontal layout: numbers sit on the discs, labels alternate above and below on leader lines. */
+.pl-num {
+  position: absolute;
+  left: var(--x);
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(180deg);
+  writing-mode: vertical-rl;
+  font-size: 10px;
+  font-weight: 550;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1;
+  pointer-events: none;
+}
+.pl-num-close {
+  color: var(--mint);
+}
 .pipeline-labels {
   display: contents;
   list-style: none;
   margin: 0;
   padding: 0;
 }
-.pipeline-labels li {
-  padding: 16px 7px 0;
+.pl-item {
+  position: absolute;
+  left: var(--x);
+  width: clamp(150px, 17vw, 240px);
+  transform: translateX(-50%);
   text-align: center;
+}
+.pl-up {
+  bottom: 80%;
+  padding-bottom: 12px;
+}
+.pl-down {
+  top: 80%;
+  padding-top: 12px;
 }
 .pl-label {
   display: block;
@@ -92,69 +131,76 @@
 }
 .pl-desc {
   display: block;
-  margin-top: 8px;
+  margin-top: 6px;
   font-size: 12px;
   line-height: 1.55;
   color: #9cb5a5;
 }
-.pl-close .pl-label {
-  color: var(--mint);
-}
 
-/* Draw-in. Only armed by pipeline-diagram.js when motion is allowed; otherwise the finished diagram shows. */
-.pipeline.is-armed .pl-draw {
+/* Appear one by one. Only armed by pipeline-diagram.js when motion is allowed; otherwise the finished diagram shows. */
+.pipeline.is-armed .pl-disc,
+.pipeline.is-armed .pl-item,
+.pipeline.is-armed .pl-num {
   opacity: 0;
-  stroke-linecap: butt;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
 }
-.pipeline.is-armed .pl-axis,
-.pipeline.is-armed .pl-node,
+.pipeline.is-armed .pl-disc {
+  transform: translateX(-10px);
+}
 .pipeline.is-armed .pl-dot {
   opacity: 0;
 }
-.pipeline.is-playing .pl-draw {
+.pipeline.is-playing .pl-disc,
+.pipeline.is-playing .pl-item,
+.pipeline.is-playing .pl-num {
   opacity: 1;
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1s ease-in-out calc(var(--i, 0) * 90ms);
+  transition:
+    opacity 0.5s ease calc(var(--i, 0) * 140ms),
+    transform 0.5s ease calc(var(--i, 0) * 140ms);
 }
-.pipeline.is-playing .pl-axis {
-  opacity: 1;
-  transition: opacity 0.8s ease;
-}
-.pipeline.is-playing .pl-node {
-  opacity: 0.75;
-  transition: opacity 0.5s ease 0.7s;
-}
-.pipeline.is-playing .pl-node-knot {
-  opacity: 1;
+.pipeline.is-playing .pl-disc {
+  transform: none;
 }
 
+/* Phones and small tablets: top to bottom, discs on the left, labels beside them. */
 @media (max-width: 850px) {
   .pipeline-wrap {
     margin-top: 64px;
     padding-top: 44px;
   }
   .pipeline-visual {
-    margin-top: 36px;
-    grid-template-columns: 110px 1fr;
-    grid-template-rows: repeat(4, 84px) 56px repeat(3, 84px);
-    column-gap: 18px;
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    grid-template-rows: repeat(8, 76px);
   }
-  .pipeline-svg-wide {
+  .pipeline-svg-wide,
+  .pl-num {
     display: none;
   }
   .pipeline-svg-tall {
     display: block;
     grid-column: 1;
     grid-row: 1 / -1;
-    width: 110px;
-    height: 644px;
+    width: 120px;
+    height: 608px;
   }
-  .pipeline-labels li {
+  .pipeline-labels {
+    display: contents;
+  }
+  .pl-item,
+  .pl-up,
+  .pl-down {
+    position: static;
+    transform: none;
     grid-column: 2;
+    grid-row: var(--row);
     align-self: center;
-    padding: 0;
+    width: auto;
+    padding: 0 0 0 4px;
     text-align: left;
   }
+  /* The row for the Close disc has no label, so the labelled rows keep their own explicit row numbers. */
+}
+.nb {
+  white-space: nowrap;
 }

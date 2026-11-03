@@ -1,8 +1,8 @@
 // The bow-tie diagram is static inline SVG, so it works with no JavaScript. This only adds a one-off
-// draw-in and a dot that travels to the "Close" knot, then fans out into the widening side.
-const DRAW_MS = 500; // the dot starts once the lines are mostly drawn
-const IN_MS = 1300; // dot travels the narrowing side to the knot
-const OUT_MS = 1000; // then three dots fan out through the widening side
+// one-by-one appearance of the discs, then a dot that travels to the "Close" disc and fans out into three.
+const DRAW_MS = 1000; // the discs stagger in over about 1.5s; the dot starts as the last ones arrive
+const IN_MS = 1300; // dot travels the narrowing side to the Close disc
+const OUT_MS = 1000; // then three dots fan out through the growing side
 const ease = (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
 const clamp = (value) => Math.max(0, Math.min(1, value));
 
