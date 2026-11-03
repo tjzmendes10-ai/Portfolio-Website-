@@ -1,6 +1,13 @@
 // Development-only: writes the pipeline diagram (inline SVG, labels and screen-reader list) into index.html.
-// Every disc is sized from a few constants, so the outline stays perfectly straight if any of them change.
 //   npm run pipeline:generate
+//
+// The diagram is a bow-tie made of two cones joined by a flat coin:
+//   - Left cone (discs before Close): one straight line from the outer face of the first disc to Close's left face.
+//   - Close: a cylinder, both faces the same size.
+//   - Right cone (discs after Close): one straight line from Close's right face to the outer face of the last disc.
+// Each disc is a thin slice of its cone (a frustum). Both of its faces are sized from the straight line at that
+// face's own position, so every slice edge sits exactly on the line. Nothing is hand-tuned: change a constant
+// and run the script again.
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
@@ -22,41 +29,38 @@ const stages = [
 const CLOSE = stages.findIndex((stage) => stage.number === null);
 const LAST = stages.length - 1;
 
-// Horizontal layout (desktop). Units are SVG units in a 770 x 400 box.
+// Horizontal layout (desktop). Units are SVG units.
 const wide = {
-  width: 770,
-  height: 400,
-  centreY: 200, // every disc is centred on this line
-  firstX: 54, // x of disc 01's front face
-  pitch: 94, // distance between disc fronts
-  depth: 14, // front-to-back thickness, the same for every disc
-  firstHeight: 84, // half-height of disc 01
-  closeHeight: 22, // half-height of the Close disc
-  lastHeight: 86, // half-height of the last disc (at least as big as the first)
-  faceRatio: 0.36, // face half-width as a share of its half-height
-  labelUp: 84, // y where the labels above end
-  labelDown: 316, // y where the labels below begin
+  width: 850,
+  height: 390,
+  centreY: 195, // every disc is centred on this line
+  firstX: 60, // x of disc 01's front face
+  pitch: 100, // distance between disc fronts
+  depth: 18, // slice thickness (front face to back face), the same for every disc
+  firstHeight: 80, // half-height of disc 01's outer (front) face
+  closeHeight: 34, // half-height of both Close faces
+  lastHeight: 84, // half-height of the last disc's outer (back) face; at least the first
+  faceRatio: 0.5, // face half-width as a share of its half-height
+  labelUp: 78, // y where the labels above end
+  labelDown: 312, // y where the labels below begin
+  tail: 30, // how far past the right edge the travelling dots run before they fade
 };
-// Vertical layout (phones): the same discs stacked top to bottom.
+// Vertical layout (phones): the same two cones stacked top to bottom.
 const tall = {
   width: 120,
   rowHeight: 76,
   centreX: 52,
   depth: 7,
   firstHalfWidth: 46,
-  closeHalfWidth: 22,
+  closeHalfWidth: 26,
   lastHalfWidth: 48,
   faceRatio: 0.3,
+  tail: 30,
 };
 
 const n = (value) => String(Math.round(value * 100) / 100);
 const lerp = (from, to, t) => from + (to - from) * t;
-// Size along the line: straight from the first disc to Close, then straight from Close to the last disc.
-const along = (i, first, close, last) =>
-  i <= CLOSE
-    ? lerp(first, close, i / CLOSE)
-    : lerp(close, last, (i - CLOSE) / (LAST - CLOSE));
-// Dots that fan out of Close rest at these shares of the last disc's half-size.
+// Dots that fan out of Close head along these shares of the right-hand cone's half-size.
 const fan = [-0.5, 0, 0.5];
 const labelSide = (i) => {
   if (stages[i].text === null) return null;
@@ -64,29 +68,55 @@ const labelSide = (i) => {
   return order % 2 === 0 ? "up" : "down";
 };
 
+// One cone geometry for both orientations. `at(i)` is where disc i's first face sits along the axis,
+// `depth` is the slice thickness, and `size(i)` gives both of its half-sizes straight from the two lines.
+function cones({ at, depth, first, close, last }) {
+  // Left line: first disc's outer face -> Close's left face.
+  const left = (position) => lerp(first, close, (position - at(0)) / (at(CLOSE) - at(0)));
+  // Right line: Close's right face -> last disc's outer (far) face.
+  const right = (position) =>
+    lerp(close, last, (position - (at(CLOSE) + depth)) / (at(LAST) + depth - (at(CLOSE) + depth)));
+  const faces = (i) => {
+    if (i === CLOSE) return [close, close]; // Close is a flat coin: a cylinder
+    const line = i < CLOSE ? left : right;
+    return [line(at(i)), line(at(i) + depth)];
+  };
+  return { left, right, faces };
+}
+
 function wideSvg() {
   const { centreY: cy, depth: d } = wide;
   const x = (i) => wide.firstX + wide.pitch * i;
-  const h = (i) => along(i, wide.firstHeight, wide.closeHeight, wide.lastHeight);
-  const rx = (i) => h(i) * wide.faceRatio;
+  const { right, faces } = cones({
+    at: x,
+    depth: d,
+    first: wide.firstHeight,
+    close: wide.closeHeight,
+    last: wide.lastHeight,
+  });
   const out = [];
   stages.forEach((stage, i) => {
+    const [front, back] = faces(i);
+    const [rf, rb] = [front * wide.faceRatio, back * wide.faceRatio];
     out.push(`<g class="pl-disc${i === CLOSE ? " pl-disc-knot" : ""}" style="--i:${i}">`);
-    // The outline touches every disc at the same place: the top and bottom of its back rim (x + depth).
-    if (i > 0)
+    // The stretch of outline between the previous slice and this one. Same straight line as the slice edges.
+    if (i > 0) {
+      const previousBack = faces(i - 1)[1];
       for (const side of [-1, 1])
         out.push(
-          `  <line class="pl-outline" x1="${n(x(i - 1) + d)}" y1="${n(cy + side * h(i - 1))}" x2="${n(x(i) + d)}" y2="${n(cy + side * h(i))}" />`,
+          `  <line class="pl-outline" x1="${n(x(i - 1) + d)}" y1="${n(cy + side * previousBack)}" x2="${n(x(i))}" y2="${n(cy + side * front)}" />`,
         );
+    }
     out.push(
-      `  <path class="pl-body" d="M${n(x(i))} ${n(cy - h(i))}L${n(x(i) + d)} ${n(cy - h(i))}A${n(rx(i))} ${n(h(i))} 0 0 1 ${n(x(i) + d)} ${n(cy + h(i))}L${n(x(i))} ${n(cy + h(i))}Z" />`,
-      `  <ellipse class="pl-face" cx="${n(x(i))}" cy="${cy}" rx="${n(rx(i))}" ry="${n(h(i))}" />`,
-      `  <ellipse class="pl-face-tint" cx="${n(x(i))}" cy="${cy}" rx="${n(rx(i))}" ry="${n(h(i))}" />`,
+      `  <path class="pl-body" d="M${n(x(i))} ${n(cy - front)}L${n(x(i) + d)} ${n(cy - back)}A${n(rb)} ${n(back)} 0 0 1 ${n(x(i) + d)} ${n(cy + back)}L${n(x(i))} ${n(cy + front)}Z" />`,
+      `  <ellipse class="pl-face" cx="${n(x(i))}" cy="${cy}" rx="${n(rf)}" ry="${n(front)}" />`,
+      `  <ellipse class="pl-face-tint" cx="${n(x(i))}" cy="${cy}" rx="${n(rf)}" ry="${n(front)}" />`,
     );
     const side = labelSide(i);
     if (side) {
       const lx = x(i) + d / 2;
-      const y0 = side === "up" ? cy - h(i) : cy + h(i);
+      const edge = (front + back) / 2; // the slice's top or bottom edge, halfway along
+      const y0 = side === "up" ? cy - edge : cy + edge;
       const y1 = side === "up" ? wide.labelUp : wide.labelDown;
       out.push(
         `  <line class="pl-leader" x1="${n(lx)}" y1="${n(y0)}" x2="${n(lx)}" y2="${n(y1)}" />`,
@@ -95,23 +125,20 @@ function wideSvg() {
     }
     out.push("</g>");
   });
-  // Paths the travelling dot follows, and where the three dots rest on the last disc.
-  const restX = x(LAST) + rx(LAST) * 0.62;
+  // Paths the travelling dot follows: along the centre line to Close, then three dots fan out past the last disc.
+  const end = wide.width + wide.tail;
   out.push(`<path class="pl-track" data-track="main" d="M8 ${cy}L${n(x(CLOSE))} ${cy}" />`);
-  const ends = fan.map((share) => {
-    const points = [
-      [x(CLOSE), cy],
-      [x(CLOSE + 1), cy + share * h(CLOSE + 1)],
-      [x(CLOSE + 2), cy + share * h(CLOSE + 2)],
-      [restX, cy + share * h(LAST)],
-    ];
+  for (const share of fan) {
+    const points = [x(CLOSE), x(CLOSE + 1), x(CLOSE + 2), x(LAST), end].map((px) => [
+      px,
+      cy + share * right(px) * Math.min(1, (px - x(CLOSE)) / wide.pitch),
+    ]);
     out.push(
       `<path class="pl-track" data-track="fan" d="${points.map(([px, py], j) => `${j ? "L" : "M"}${n(px)} ${n(py)}`).join("")}" />`,
     );
-    return points.at(-1);
-  });
+  }
   out.push(`<circle class="pl-dot pl-dot-main" cx="8" cy="${cy}" r="2.6" />`);
-  ends.forEach(([ex, ey]) => out.push(`<circle class="pl-dot pl-dot-fan" cx="${n(ex)}" cy="${n(ey)}" r="2.6" />`));
+  fan.forEach(() => out.push(`<circle class="pl-dot pl-dot-fan" cx="${n(x(CLOSE))}" cy="${cy}" r="2.6" />`));
   return `<svg class="pipeline-svg pipeline-svg-wide" viewBox="0 0 ${wide.width} ${wide.height}" fill="none" stroke-linecap="round" focusable="false" aria-hidden="true">\n${out.map((line) => `  ${line}`).join("\n")}\n</svg>`;
 }
 
@@ -119,45 +146,53 @@ function tallSvg() {
   const { centreX: cx, depth: t, rowHeight: row } = tall;
   const height = row * stages.length;
   const y = (i) => row * i + row / 2 - 3;
-  const w = (i) => along(i, tall.firstHalfWidth, tall.closeHalfWidth, tall.lastHalfWidth);
-  const m = (i) => w(i) * tall.faceRatio;
+  const { right, faces } = cones({
+    at: y,
+    depth: t,
+    first: tall.firstHalfWidth,
+    close: tall.closeHalfWidth,
+    last: tall.lastHalfWidth,
+  });
   const out = [];
   stages.forEach((stage, i) => {
+    const [top, bottom] = faces(i);
+    const [mt, mb] = [top * tall.faceRatio, bottom * tall.faceRatio];
     out.push(`<g class="pl-disc${i === CLOSE ? " pl-disc-knot" : ""}" style="--i:${i}">`);
-    // Same rule as the wide layout: the outline meets the left and right ends of every disc's back (lower) rim.
-    if (i > 0)
+    if (i > 0) {
+      const previousBottom = faces(i - 1)[1];
       for (const side of [-1, 1])
         out.push(
-          `  <line class="pl-outline" x1="${n(cx + side * w(i - 1))}" y1="${n(y(i - 1) + t)}" x2="${n(cx + side * w(i))}" y2="${n(y(i) + t)}" />`,
+          `  <line class="pl-outline" x1="${n(cx + side * previousBottom)}" y1="${n(y(i - 1) + t)}" x2="${n(cx + side * top)}" y2="${n(y(i))}" />`,
         );
+    }
     out.push(
-      `  <path class="pl-body" d="M${n(cx - w(i))} ${n(y(i))}L${n(cx - w(i))} ${n(y(i) + t)}A${n(w(i))} ${n(m(i))} 0 0 0 ${n(cx + w(i))} ${n(y(i) + t)}L${n(cx + w(i))} ${n(y(i))}Z" />`,
-      `  <ellipse class="pl-face" cx="${cx}" cy="${n(y(i))}" rx="${n(w(i))}" ry="${n(m(i))}" />`,
-      `  <ellipse class="pl-face-tint" cx="${cx}" cy="${n(y(i))}" rx="${n(w(i))}" ry="${n(m(i))}" />`,
-      `  <text class="pl-num-text${i === CLOSE ? " pl-num-close" : ""}" x="${cx}" y="${n(y(i) + (i === CLOSE ? 2.3 : 2.6))}" text-anchor="middle" stroke="none">${stage.number ?? stage.name.toUpperCase()}</text>`,
+      `  <path class="pl-body" d="M${n(cx - top)} ${n(y(i))}L${n(cx - bottom)} ${n(y(i) + t)}A${n(bottom)} ${n(mb)} 0 0 0 ${n(cx + bottom)} ${n(y(i) + t)}L${n(cx + top)} ${n(y(i))}Z" />`,
+      `  <ellipse class="pl-face" cx="${cx}" cy="${n(y(i))}" rx="${n(top)}" ry="${n(mt)}" />`,
+      `  <ellipse class="pl-face-tint" cx="${cx}" cy="${n(y(i))}" rx="${n(top)}" ry="${n(mt)}" />`,
+      `  <text class="pl-num-text${i === CLOSE ? " pl-num-close" : ""}" x="${cx}" y="${n(y(i) + (i === CLOSE ? 2.5 : 2.6))}" text-anchor="middle" stroke="none">${stage.number ?? stage.name.toUpperCase()}</text>`,
     );
-    if (labelSide(i))
+    if (labelSide(i)) {
+      const edge = (top + bottom) / 2;
       out.push(
-        `  <line class="pl-leader" x1="${n(cx + w(i) + 4)}" y1="${n(y(i))}" x2="${tall.width - 4}" y2="${n(y(i))}" />`,
-        `  <circle class="pl-pin" cx="${tall.width - 4}" cy="${n(y(i))}" r="2" />`,
+        `  <line class="pl-leader" x1="${n(cx + edge + 4)}" y1="${n(y(i) + t / 2)}" x2="${tall.width - 4}" y2="${n(y(i) + t / 2)}" />`,
+        `  <circle class="pl-pin" cx="${tall.width - 4}" cy="${n(y(i) + t / 2)}" r="2" />`,
       );
+    }
     out.push("</g>");
   });
+  const end = height + tall.tail;
   out.push(`<path class="pl-track" data-track="main" d="M${cx} 4L${cx} ${n(y(CLOSE))}" />`);
-  const ends = fan.map((share) => {
-    const points = [
-      [cx, y(CLOSE)],
-      [cx + share * w(CLOSE + 1), y(CLOSE + 1)],
-      [cx + share * w(CLOSE + 2), y(CLOSE + 2)],
-      [cx + share * w(LAST), y(LAST) + 0.55 * m(LAST)],
-    ];
+  for (const share of fan) {
+    const points = [y(CLOSE), y(CLOSE + 1), y(CLOSE + 2), y(LAST), end].map((py) => [
+      cx + share * right(py) * Math.min(1, (py - y(CLOSE)) / row),
+      py,
+    ]);
     out.push(
       `<path class="pl-track" data-track="fan" d="${points.map(([px, py], j) => `${j ? "L" : "M"}${n(px)} ${n(py)}`).join("")}" />`,
     );
-    return points.at(-1);
-  });
+  }
   out.push(`<circle class="pl-dot pl-dot-main" cx="${cx}" cy="4" r="3" />`);
-  ends.forEach(([ex, ey]) => out.push(`<circle class="pl-dot pl-dot-fan" cx="${n(ex)}" cy="${n(ey)}" r="3" />`));
+  fan.forEach(() => out.push(`<circle class="pl-dot pl-dot-fan" cx="${cx}" cy="${n(y(CLOSE))}" r="3" />`));
   return `<svg class="pipeline-svg pipeline-svg-tall" viewBox="0 0 ${tall.width} ${height}" width="${tall.width}" height="${height}" fill="none" stroke-linecap="round" focusable="false" aria-hidden="true">\n${out.map((line) => `  ${line}`).join("\n")}\n</svg>`;
 }
 

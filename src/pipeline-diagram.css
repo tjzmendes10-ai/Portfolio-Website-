@@ -65,11 +65,10 @@
   stroke: none;
   fill: none;
 }
+/* The dots only exist while they travel (pipeline-diagram.js sets their opacity); at rest none are shown. */
 .pl-dot {
   fill: var(--mint);
   stroke: none;
-}
-.pl-dot-main {
   opacity: 0;
 }
 .pl-num-text {
@@ -81,8 +80,8 @@
 }
 .pl-num-text.pl-num-close {
   fill: var(--mint);
-  font-size: 6.4px;
-  letter-spacing: 0.12em;
+  font-size: 7px;
+  letter-spacing: 0.1em;
 }
 
 /* Horizontal layout: numbers sit on the discs, labels alternate above and below on leader lines. */
@@ -90,11 +89,10 @@
   position: absolute;
   left: var(--x);
   top: 50%;
-  transform: translate(-50%, -50%) rotate(180deg);
-  writing-mode: vertical-rl;
-  font-size: 10px;
+  transform: translate(-50%, -50%);
+  font-size: clamp(8px, 0.72vw + 1px, 10px);
   font-weight: 550;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
   line-height: 1;
@@ -102,6 +100,8 @@
 }
 .pl-num-close {
   color: var(--mint);
+  font-size: clamp(7.5px, 0.6vw + 1px, 9px);
+  letter-spacing: 0.06em;
 }
 .pipeline-labels {
   display: contents;
@@ -149,9 +149,6 @@
 }
 .pipeline.is-armed .pl-disc {
   transform: translateX(-10px);
-}
-.pipeline.is-armed .pl-dot {
-  opacity: 0;
 }
 .pipeline.is-playing .pl-disc,
 .pipeline.is-playing .pl-item,

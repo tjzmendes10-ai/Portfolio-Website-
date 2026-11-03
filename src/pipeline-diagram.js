@@ -2,7 +2,7 @@
 // one-by-one appearance of the discs, then a dot that travels to the "Close" disc and fans out into three.
 const DRAW_MS = 1000; // the discs stagger in over about 1.5s; the dot starts as the last ones arrive
 const IN_MS = 1300; // dot travels the narrowing side to the Close disc
-const OUT_MS = 1000; // then three dots fan out through the growing side
+const OUT_MS = 1600; // then three dots fan out through the growing side, past the last disc, and fade
 const ease = (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
 const clamp = (value) => Math.max(0, Math.min(1, value));
 
@@ -58,13 +58,15 @@ function play(figure) {
     } else {
       mainDot.style.opacity = 0;
       const t = (elapsed - IN_MS) / OUT_MS;
+      // Fade in as they leave Close, fade away once they are past the last disc.
+      const visible = Math.min(1, t / 0.12) * Math.min(1, (1 - t) / 0.35);
       fanDots.forEach((dot, index) => {
-        dot.style.opacity = 1;
+        dot.style.opacity = clamp(visible).toFixed(3);
         move(dot, fans[index], fanLengths[index], t);
       });
     }
     if (elapsed < IN_MS + OUT_MS) return requestAnimationFrame(frame);
-    // Finish exactly on the resting positions the markup already has, then hand back to plain CSS.
+    // Put every dot back where the markup has it (hidden), then hand back to plain CSS.
     rest.forEach(({ dot, cx, cy }) => {
       dot.setAttribute("cx", cx);
       dot.setAttribute("cy", cy);
