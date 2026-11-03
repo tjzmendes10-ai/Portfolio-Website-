@@ -943,25 +943,6 @@ h2 span {
 .footer-top h2 {
   font-size: clamp(37px, 4.4vw, 63px);
 }
-.contact-arrow {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--mint);
-  color: #1a4029;
-  font-size: 55px;
-  font-weight: 400;
-  transition:
-    transform 0.2s,
-    background 0.2s;
-  flex: none;
-}
-.contact-arrow:hover {
-  transform: rotate(8deg);
-  background: #d4f5dd;
-}
 .footer-contact {
   display: flex;
   justify-content: space-between;
@@ -1691,12 +1672,6 @@ h2 span {
   }
   .footer-top h2 {
     font-size: clamp(30px, 7.4vw, 42px);
-  }
-  .contact-arrow {
-    width: 52px;
-    height: 52px;
-    font-size: 35px;
-    margin-bottom: 4px;
   }
   .footer-contact {
     align-items: start;

@@ -238,12 +238,6 @@ body {
 .is-network-complete .anz-footer-line .status-dot {
   box-shadow: 0 0 12px #34d39944;
 }
-.contact-arrow {
-  background: #b2d9bf;
-}
-.contact-arrow:hover {
-  background: #c7e6cf;
-}
 
 @media (min-width: 1600px) {
   .hero {
