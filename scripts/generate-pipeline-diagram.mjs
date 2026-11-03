@@ -166,7 +166,7 @@ function wideSvg() {
   flow.forEach((_, j) =>
     out.push(`<circle class="pl-dot" data-dot="${j}" cx="8" cy="${cy}" r="2.6" />`),
   );
-  flowData = JSON.stringify({ axis: "x", start: 8, end, dots });
+  flowData = JSON.stringify({ axis: "x", start: 8, end, slow: [x(QUALIFY), x(EXPAND)], dots });
   return `<svg class="pipeline-svg pipeline-svg-wide" data-flow='${flowData}' viewBox="0 0 ${wide.width} ${wide.height}" fill="none" stroke-linecap="round" focusable="false" aria-hidden="true">\n${out.map((line) => `  ${line}`).join("\n")}\n</svg>`;
 }
 
@@ -220,7 +220,7 @@ function tallSvg() {
   flow.forEach((_, j) =>
     out.push(`<circle class="pl-dot" data-dot="${j}" cx="${cx}" cy="4" r="3" />`),
   );
-  const flowData = JSON.stringify({ axis: "y", start: 4, end, dots });
+  const flowData = JSON.stringify({ axis: "y", start: 4, end, slow: [y(QUALIFY), y(EXPAND)], dots });
   return `<svg class="pipeline-svg pipeline-svg-tall" data-flow='${flowData}' viewBox="0 0 ${tall.width} ${height}" width="${tall.width}" height="${height}" fill="none" stroke-linecap="round" focusable="false" aria-hidden="true">\n${out.map((line) => `  ${line}`).join("\n")}\n</svg>`;
 }
 
