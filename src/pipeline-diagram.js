@@ -1,9 +1,10 @@
-// The bow-tie diagram is static inline SVG, so it works with no JavaScript. This only adds a one-off
-// one-by-one appearance of the discs, then a dot that travels to the "Close" disc and fans out into three.
-const DRAW_MS = 1000; // the discs stagger in over about 1.5s; the dot starts as the last ones arrive
-const IN_MS = 1300; // dot travels the narrowing side to the Close disc
-const OUT_MS = 1600; // then three dots fan out through the growing side, past the last disc, and fade
-const ease = (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
+// The diagram is static inline SVG, so it works with no JavaScript. This only adds a one-off animation:
+// the discs appear one by one, then dots flow through. Three enter, one drops out at Qualify, the other
+// two pass through Close, split at Expand into four, and run out past Reference and fade.
+// The generator (scripts/generate-pipeline-diagram.mjs) writes each dot's route into the SVG's data-flow.
+const DRAW_MS = 1000; // the discs stagger in over about 1.5s; the dots start as the last ones arrive
+const FLOW_MS = 5200; // the dots' whole journey, left to right
+const ease = (t) => 0.5 - 0.5 * Math.cos(Math.PI * t); // gentle in and out, so each stage reads
 const clamp = (value) => Math.max(0, Math.min(1, value));
 
 export function initPipelineDiagram() {
@@ -25,52 +26,55 @@ export function initPipelineDiagram() {
   observer.observe(figure);
 }
 
+// Value at `position` along a list of [position, value] stops (flat outside the first and last).
+function between(stops, position) {
+  if (position <= stops[0][0]) return stops[0][1];
+  for (let i = 1; i < stops.length; i++) {
+    const [to, toValue] = stops[i];
+    if (position <= to) {
+      const [from, fromValue] = stops[i - 1];
+      return fromValue + ((toValue - fromValue) * (position - from)) / (to - from);
+    }
+  }
+  return stops.at(-1)[1];
+}
+
 function play(figure) {
   // Whichever drawing is on screen (horizontal or vertical) gets the travelling dots.
   const svg = [...figure.querySelectorAll(".pipeline-svg")].find(
     (node) => getComputedStyle(node).display !== "none",
   );
-  const main = svg.querySelector('[data-track="main"]');
-  const fans = [...svg.querySelectorAll('[data-track="fan"]')];
-  const mainDot = svg.querySelector(".pl-dot-main");
-  const fanDots = [...svg.querySelectorAll(".pl-dot-fan")];
-  const rest = [mainDot, ...fanDots].map((dot) => ({
-    dot,
-    cx: dot.getAttribute("cx"),
-    cy: dot.getAttribute("cy"),
+  const { axis, start, end, dots: routes } = JSON.parse(svg.dataset.flow);
+  const [along, across] = axis === "x" ? ["cx", "cy"] : ["cy", "cx"];
+  const dots = routes.map((route, index) => ({
+    ...route,
+    node: svg.querySelector(`.pl-dot[data-dot="${index}"]`),
   }));
-  const mainLength = main.getTotalLength();
-  const fanLengths = fans.map((track) => track.getTotalLength());
-  const move = (dot, track, length, t) => {
-    const point = track.getPointAtLength(length * ease(clamp(t)));
-    dot.setAttribute("cx", point.x.toFixed(2));
-    dot.setAttribute("cy", point.y.toFixed(2));
-  };
+  const rest = dots.map(({ node }) => ({
+    node,
+    cx: node.getAttribute("cx"),
+    cy: node.getAttribute("cy"),
+  }));
 
   figure.classList.add("is-playing");
-  const start = performance.now() + DRAW_MS;
+  const begin = performance.now() + DRAW_MS;
   const frame = (now) => {
-    const elapsed = now - start;
+    const elapsed = now - begin;
     if (elapsed < 0) return requestAnimationFrame(frame);
-    if (elapsed < IN_MS) {
-      mainDot.style.opacity = Math.min(1, elapsed / 200);
-      move(mainDot, main, mainLength, elapsed / IN_MS);
-    } else {
-      mainDot.style.opacity = 0;
-      const t = (elapsed - IN_MS) / OUT_MS;
-      // Fade in as they leave Close, fade away once they are past the last disc.
-      const visible = Math.min(1, t / 0.12) * Math.min(1, (1 - t) / 0.35);
-      fanDots.forEach((dot, index) => {
-        dot.style.opacity = clamp(visible).toFixed(3);
-        move(dot, fans[index], fanLengths[index], t);
-      });
-    }
-    if (elapsed < IN_MS + OUT_MS) return requestAnimationFrame(frame);
+    const progress = clamp(elapsed / FLOW_MS);
+    const position = start + (end - start) * ease(progress);
+    dots.forEach(({ node, keys, show: [from, full, fade, gone] }) => {
+      node.setAttribute(along, position.toFixed(2));
+      node.setAttribute(across, between(keys, position).toFixed(2));
+      const visible = clamp((position - from) / (full - from)) * clamp((gone - position) / (gone - fade));
+      node.style.opacity = visible.toFixed(3);
+    });
+    if (progress < 1) return requestAnimationFrame(frame);
     // Put every dot back where the markup has it (hidden), then hand back to plain CSS.
-    rest.forEach(({ dot, cx, cy }) => {
-      dot.setAttribute("cx", cx);
-      dot.setAttribute("cy", cy);
-      dot.style.opacity = "";
+    rest.forEach(({ node, cx, cy }) => {
+      node.setAttribute("cx", cx);
+      node.setAttribute("cy", cy);
+      node.style.opacity = "";
     });
     figure.classList.remove("is-armed", "is-playing");
     figure.classList.add("is-done");
