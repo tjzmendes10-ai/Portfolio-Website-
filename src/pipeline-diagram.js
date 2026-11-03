@@ -3,8 +3,10 @@
 // two pass through Close, split at Expand into four, and run out past Reference and fade.
 // The generator (scripts/generate-pipeline-diagram.mjs) writes each dot's route into the SVG's data-flow.
 const DRAW_MS = 1000; // the discs stagger in over about 1.5s; the dots start as the last ones arrive
-const FLOW_MS = 5200; // the dots' whole journey, left to right
-const ease = (t) => 0.5 - 0.5 * Math.cos(Math.PI * t); // gentle in and out, so each stage reads
+const BASE_MS = 5200; // the journey's pace everywhere else: a gentle ease in and out
+const DWELL = 0.09; // extra time spent passing each of Qualify and Expand, as a share of BASE_MS (about 0.5s)
+const DWELL_WIDTH = 0.045; // how far either side of those stops the slow-down reaches, as a share of the journey
+const FLOW_MS = BASE_MS * (1 + 2 * DWELL); // the whole journey, including the two slow passes
 const clamp = (value) => Math.max(0, Math.min(1, value));
 
 export function initPipelineDiagram() {
@@ -39,12 +41,42 @@ function between(stops, position) {
   return stops.at(-1)[1];
 }
 
+// Maps time (0 to 1) to distance along the journey (0 to 1). It is the original ease in and out, with a little
+// extra time added only while the dots pass each stop in `slows`, so those two passes slow down and the rest of the
+// journey keeps its speed.
+function pacing(slows) {
+  const smooth = (x) => {
+    const t = clamp(x);
+    return t * t * (3 - 2 * t);
+  };
+  // Time taken to reach distance s: the plain ease, plus the dwell added around each stop.
+  const timeAt = (s) =>
+    Math.acos(1 - 2 * clamp(s)) / Math.PI +
+    slows.reduce((sum, at) => sum + DWELL * smooth((s - (at - DWELL_WIDTH)) / (2 * DWELL_WIDTH)), 0);
+  const steps = 800;
+  const times = Array.from({ length: steps + 1 }, (_, i) => timeAt(i / steps));
+  const total = times[steps];
+  return (time) => {
+    const target = clamp(time) * total;
+    let low = 0;
+    let high = steps;
+    while (high - low > 1) {
+      const mid = (low + high) >> 1;
+      if (times[mid] <= target) low = mid;
+      else high = mid;
+    }
+    const span = times[high] - times[low] || 1;
+    return (low + (target - times[low]) / span) / steps;
+  };
+}
+
 function play(figure) {
   // Whichever drawing is on screen (horizontal or vertical) gets the travelling dots.
   const svg = [...figure.querySelectorAll(".pipeline-svg")].find(
     (node) => getComputedStyle(node).display !== "none",
   );
-  const { axis, start, end, dots: routes } = JSON.parse(svg.dataset.flow);
+  const { axis, start, end, slow, dots: routes } = JSON.parse(svg.dataset.flow);
+  const travelled = pacing(slow.map((stop) => (stop - start) / (end - start)));
   const [along, across] = axis === "x" ? ["cx", "cy"] : ["cy", "cx"];
   const dots = routes.map((route, index) => ({
     ...route,
@@ -62,7 +94,7 @@ function play(figure) {
     const elapsed = now - begin;
     if (elapsed < 0) return requestAnimationFrame(frame);
     const progress = clamp(elapsed / FLOW_MS);
-    const position = start + (end - start) * ease(progress);
+    const position = start + (end - start) * travelled(progress);
     dots.forEach(({ node, keys, show: [from, full, fade, gone] }) => {
       node.setAttribute(along, position.toFixed(2));
       node.setAttribute(across, between(keys, position).toFixed(2));
