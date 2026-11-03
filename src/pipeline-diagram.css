@@ -1,0 +1,223 @@
+/* Pipeline diagram: a row of 3D discs that shrinks to the close, then grows again for expansion. */
+.pipeline-wrap {
+  position: relative;
+  margin-top: 84px;
+  padding-top: 56px;
+  border-top: 1px solid #a9d1b52b;
+}
+.pipeline {
+  margin: 0;
+}
+.pipeline-title {
+  font-size: clamp(22px, 2.1vw, 30px);
+  line-height: 1.2;
+  letter-spacing: -0.045em;
+  margin: 0;
+}
+.pipeline-visual {
+  position: relative;
+  margin-top: 40px;
+}
+.pipeline-svg {
+  display: block;
+  overflow: visible;
+  stroke-width: 0.9;
+}
+.pipeline-svg-wide {
+  width: 100%;
+  height: auto;
+}
+.pipeline-svg-tall {
+  display: none;
+  stroke-width: 1.1;
+}
+/* Solid look without gradients: a dark body, an opaque face, then a faint lighter tint over the face. */
+.pl-body,
+.pl-face {
+  fill: var(--surface);
+  stroke: var(--teal);
+  stroke-opacity: 0.85;
+}
+.pl-face-tint {
+  fill: var(--mint);
+  fill-opacity: 0.07;
+  stroke: none;
+}
+.pl-disc-knot .pl-body,
+.pl-disc-knot .pl-face {
+  stroke: var(--mint);
+  stroke-opacity: 1;
+}
+.pl-outline {
+  stroke: var(--teal);
+  stroke-opacity: 0.55;
+}
+.pl-leader {
+  stroke: var(--teal);
+  stroke-opacity: 0.45;
+}
+.pl-pin {
+  fill: var(--mint);
+  stroke: none;
+  opacity: 0.8;
+}
+.pl-track {
+  stroke: none;
+  fill: none;
+}
+/* The dots only exist while they travel (pipeline-diagram.js sets their opacity); at rest none are shown. */
+.pl-dot {
+  fill: var(--mint);
+  stroke: none;
+  opacity: 0;
+}
+.pl-num-text {
+  fill: var(--muted);
+  font-family: "DM Sans", sans-serif;
+  font-size: 9px;
+  font-weight: 550;
+  letter-spacing: 0.1em;
+}
+.pl-num-text.pl-num-close {
+  fill: var(--mint);
+  font-size: 7px;
+  letter-spacing: 0.1em;
+}
+
+/* Horizontal layout: numbers sit on the discs, labels alternate above and below on leader lines. */
+.pl-num {
+  position: absolute;
+  left: var(--x);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(8px, 0.72vw + 1px, 10px);
+  font-weight: 550;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1;
+  pointer-events: none;
+}
+.pl-num-close {
+  color: var(--mint);
+  font-size: clamp(7.5px, 0.6vw + 1px, 9px);
+  letter-spacing: 0.06em;
+}
+.pipeline-labels {
+  display: contents;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pl-item {
+  position: absolute;
+  left: var(--x);
+  width: clamp(150px, 17vw, 240px);
+  transform: translateX(-50%);
+  text-align: center;
+}
+.pl-up {
+  bottom: 80%;
+  padding-bottom: 12px;
+}
+.pl-down {
+  top: 80%;
+  padding-top: 12px;
+}
+.pl-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 550;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pl-desc {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #9cb5a5;
+}
+
+/* Appear one by one. Only armed by pipeline-diagram.js when motion is allowed; otherwise the finished diagram shows. */
+.pipeline.is-armed .pl-disc,
+.pipeline.is-armed .pl-item,
+.pipeline.is-armed .pl-num {
+  opacity: 0;
+}
+.pipeline.is-armed .pl-disc {
+  transform: translateX(-10px);
+}
+.pipeline.is-playing .pl-disc,
+.pipeline.is-playing .pl-item,
+.pipeline.is-playing .pl-num {
+  opacity: 1;
+  transition:
+    opacity 0.5s ease calc(var(--i, 0) * 140ms),
+    transform 0.5s ease calc(var(--i, 0) * 140ms);
+}
+.pipeline.is-playing .pl-disc {
+  transform: none;
+}
+
+/* Phones and small tablets: top to bottom, discs on the left, labels beside them. */
+@media (max-width: 850px) {
+  .pipeline-wrap {
+    margin-top: 64px;
+    padding-top: 44px;
+  }
+  .pipeline-visual {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    grid-template-rows: repeat(8, 76px);
+  }
+  .pipeline-svg-wide,
+  .pl-num {
+    display: none;
+  }
+  .pipeline-svg-tall {
+    display: block;
+    grid-column: 1;
+    grid-row: 1 / -1;
+    width: 120px;
+    height: 608px;
+  }
+  .pipeline-labels {
+    display: contents;
+  }
+  .pl-item,
+  .pl-up,
+  .pl-down {
+    position: static;
+    transform: none;
+    grid-column: 2;
+    grid-row: var(--row);
+    align-self: center;
+    width: auto;
+    padding: 0 0 0 4px;
+    text-align: left;
+  }
+  /* The row for the Close disc has no label, so the labelled rows keep their own explicit row numbers. */
+}
+.nb {
+  white-space: nowrap;
+}
+
+/* Map behind the diagram: softened and dimmed, the same way it steps back behind the journey timeline. */
+.anz-background.is-blurred .anz-map-stage {
+  opacity: 0.65;
+  filter: blur(3px);
+}
+.anz-background .anz-map-stage {
+  transition:
+    opacity 0.6s ease,
+    filter 0.6s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .anz-background .anz-map-stage {
+    transition: none;
+  }
+}
