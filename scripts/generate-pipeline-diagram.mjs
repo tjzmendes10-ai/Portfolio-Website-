@@ -18,11 +18,11 @@ const END = "<!-- pipeline-diagram:end -->";
 // Stages left to right. `number: null` marks the Close disc, which is named on the disc and has no label.
 const stages = [
   { number: "01", name: "Pick the door", text: "The market, vertical or account that moves the needle" },
-  { number: "02", name: "Build the pipe", text: "Self-sourced, outbound, multi-threaded" },
-  { number: "03", name: "Qualify", text: "Let the data say where to spend time" },
-  { number: "04", name: "Make the case", text: "A business case finance, legal and the C-suite can sign" },
+  { number: "02", name: "Discover", text: "How the client works, the systems they run, where it hurts" },
+  { number: "03", name: "Shape", text: "A solution built around the client, not a product" },
+  { number: "04", name: "Pilot", text: "Start small enough to prove" },
   { number: null, name: "Close", text: null },
-  { number: "05", name: "Prove it", text: "Support the pilot, show the value" },
+  { number: "05", name: "Prove", text: "Support the pilot, show the value" },
   { number: "06", name: "Expand", text: "New teams, new jurisdictions" },
   { number: "07", name: "Reference", text: "Customers who open the next door" },
 ];
@@ -60,14 +60,14 @@ const tall = {
 
 const n = (value) => String(Math.round(value * 100) / 100);
 const lerp = (from, to, t) => from + (to - from) * t;
-// The travelling dots: three enter, one drops out at Qualify, the other two pass through Close,
+// The travelling dots: three enter, one drops out at Shape, the other two pass through Close,
 // then each splits at Expand so four run out past Reference and fade. `k` is a dot's lane as a share of the
-// cone's half-size at that stop: [start, Qualify, Close, Expand, end].
-const QUALIFY = stages.findIndex((stage) => stage.name === "Qualify");
+// cone's half-size at that stop: [start, Shape, Close, Expand, end].
+const QUALIFY = stages.findIndex((stage) => stage.name === "Shape");
 const EXPAND = stages.findIndex((stage) => stage.name === "Expand");
 const flow = [
   { k: [-0.6, -0.55, -0.3, -0.3, -0.65], from: "start", until: "end" }, // top lane, runs the whole way
-  { k: [0, 0, 0, 0, 0], from: "start", until: "qualify" }, // middle lane, drops out at Qualify
+  { k: [0, 0, 0, 0, 0], from: "start", until: "shape" }, // middle lane, drops out at Shape
   { k: [0.6, 0.55, 0.3, 0.3, 0.65], from: "start", until: "end" }, // bottom lane, runs the whole way
   { k: [-0.3, -0.3, -0.3, -0.3, -0.22], from: "expand", until: "end" }, // splits off the top lane at Expand
   { k: [0.3, 0.3, 0.3, 0.3, 0.22], from: "expand", until: "end" }, // splits off the bottom lane at Expand
@@ -106,7 +106,7 @@ function dotFlow({ start, end, stops, lastFace, centre, profile }) {
   const appears = { start: [start, start + 40], expand: [expand - 10, expand + 10] };
   return flow.map((dot) => ({
     keys: positions.map((position, j) => [round(position), round(centre + dot.k[j] * profile(position))]),
-    // Dots on a lane to the end fade out after the last disc; the middle one fades at Qualify.
+    // Dots on a lane to the end fade out after the last disc; the middle one fades at Shape.
     show: [...appears[dot.from], ...(dot.until === "end" ? [lastFace, end] : [qualify - 20, qualify + 10])].map(round),
   }));
 }

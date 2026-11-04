@@ -1,10 +1,10 @@
 // The diagram is static inline SVG, so it works with no JavaScript. This only adds a one-off animation:
-// the discs appear one by one, then dots flow through. Three enter, one drops out at Qualify, the other
+// the discs appear one by one, then dots flow through. Three enter, one drops out at Shape, the other
 // two pass through Close, split at Expand into four, and run out past Reference and fade.
 // The generator (scripts/generate-pipeline-diagram.mjs) writes each dot's route into the SVG's data-flow.
 const DRAW_MS = 1000; // the discs stagger in over about 1.5s; the dots start as the last ones arrive
 const BASE_MS = 5200; // the journey's pace everywhere else: a gentle ease in and out
-const DWELL = 0.09; // extra time spent passing each of Qualify and Expand, as a share of BASE_MS (about 0.5s)
+const DWELL = 0.09; // extra time spent passing each of Shape and Expand, as a share of BASE_MS (about 0.5s)
 const DWELL_WIDTH = 0.045; // how far either side of those stops the slow-down reaches, as a share of the journey
 const FLOW_MS = BASE_MS * (1 + 2 * DWELL); // the whole journey, including the two slow passes
 const clamp = (value) => Math.max(0, Math.min(1, value));
