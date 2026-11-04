@@ -2,6 +2,10 @@
 .tom-chat-header {
   padding-block: 14px;
 }
+/* Title only, so no spacing under it: it sits centred against the robot. */
+.tom-chat-header h3 {
+  margin: 0;
+}
 .tom-chat-bot {
   flex: none;
   width: 50px;
