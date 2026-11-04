@@ -6,7 +6,7 @@ const EASTER_EGG = "Onion on top, obviously. Bunnings rules apply.";
 const FALLBACK = `Good question. That one’s best over a coffee. Drop Tom a line at ${EMAIL}.`;
 const NUDGE = "Sounds like we should talk.";
 const NUDGE_AFTER = 3; // answers seen before the nudge appears
-const TYPING_MS = [900, 1200]; // how long "TomBot is typing…" shows before an answer starts
+const TYPING_MS = [900, 1200]; // how long "TomBot is thinking…" shows before an answer starts
 
 const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const normalise = (text) => text.toLowerCase().replace(/[’‘]/g, "'");
@@ -83,7 +83,7 @@ export function initTomBot() {
     node.className = "tom-message tom-answer tom-typing-bubble";
     node.setAttribute("aria-hidden", "true");
     const label = document.createElement("span");
-    label.textContent = "TomBot is typing…";
+    label.textContent = "TomBot is thinking…";
     const dots = document.createElement("span");
     dots.className = "tom-typing";
     for (let index = 0; index < 3; index++) dots.append(document.createElement("i"));
@@ -92,7 +92,7 @@ export function initTomBot() {
     scroll();
     return node;
   }
-  // The robot pulses its antenna while TomBot is typing, and waves when an answer arrives.
+  // The robot pulses its antenna while TomBot is thinking, and waves when an answer arrives.
   function setTyping(on) {
     widget.classList.toggle("is-typing", on);
     if (on) log.setAttribute("aria-busy", "true");
@@ -176,7 +176,7 @@ export function initTomBot() {
     bubble(question, true);
     pending = { answer, typing: null, paragraph: null };
     setTyping(true);
-    announcer.textContent = "TomBot is typing.";
+    announcer.textContent = "TomBot is thinking.";
     if (motion.matches) {
       finish();
       return;
