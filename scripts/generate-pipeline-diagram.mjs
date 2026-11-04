@@ -18,12 +18,12 @@ const END = "<!-- pipeline-diagram:end -->";
 // Stages left to right. `number: null` marks the Close disc, which is named on the disc and has no label.
 const stages = [
   { number: "01", name: "Pick the door", text: "The market, vertical or account that moves the needle" },
-  { number: "02", name: "Build the pipe", text: "Self-sourced, outbound, multi-threaded" },
+  { number: "02", name: "Get in the room", text: "Self-sourced and through trained BDRs, multi-threaded" },
   { number: "03", name: "Discover", text: "How they work, what they use, where it hurts" },
   { number: "04", name: "Shape it", text: "Built around their processes, small enough to prove" },
   // The middle coin: no number or text on it, just a dot. Its label sits outside like the others.
-  { number: null, name: "Commit", text: "A plan both sides sign up to", coin: true },
-  { number: "05", name: "Prove it", text: "Support the pilot, show the value" },
+  { number: null, name: "Commit", text: "A first step both sides sign up to", coin: true },
+  { number: "05", name: "Prove it", text: "Deliver early, show the value" },
   { number: "06", name: "Expand", text: "New teams, new jurisdictions" },
   { number: "07", name: "Reference", text: "Customers who open the next door" },
 ];
