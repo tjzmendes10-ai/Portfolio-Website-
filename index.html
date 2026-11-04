@@ -974,10 +974,40 @@
           </div>
           <div class="tom-chat" hidden>
             <div class="tom-chat-header">
-              <span class="tom-chat-avatar" aria-hidden="true">tm.</span>
+              <svg
+                class="tom-chat-bot"
+                viewBox="0 0 56 72"
+                width="50"
+                height="64"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                focusable="false"
+                aria-hidden="true"
+              >
+                <line x1="28" y1="12" x2="28" y2="6.4" />
+                <circle class="bot-antenna" cx="28" cy="4.2" r="2.2" fill="currentColor" stroke="none" />
+                <rect x="10" y="12" width="36" height="26" rx="8" />
+                <path d="M10 23H7M46 23h3" />
+                <circle class="bot-eye" cx="21" cy="24.5" r="2.2" fill="currentColor" stroke="none" />
+                <circle class="bot-eye" cx="35" cy="24.5" r="2.2" fill="currentColor" stroke="none" />
+                <path d="M24.5 31.6q3.5 2.6 7 0" />
+                <path d="M28 38v4" />
+                <rect x="13" y="42" width="30" height="21" rx="6" />
+                <text class="bot-monogram" x="28" y="56.4" text-anchor="middle" fill="currentColor" stroke="none">tm.</text>
+                <path d="M13 47c-4 1-6 5-6 10" />
+                <circle cx="7" cy="58.6" r="1.6" />
+                <g class="bot-arm">
+                  <path d="M43 47c4 1 6 5 6 10" />
+                  <circle cx="49" cy="58.6" r="1.6" />
+                </g>
+                <path d="M21 63v4M35 63v4M18 67h6M32 67h6" />
+              </svg>
               <div>
-                <h3>Ask about Tom</h3>
-                <p>Fixed answers from Tom</p>
+                <h3>Ask TomBot</h3>
+                <p>Scripted, so it never makes things up</p>
               </div>
               <button
                 type="button"
@@ -992,7 +1022,7 @@
               class="tom-chat-log"
               role="log"
               aria-live="off"
-              aria-label="Conversation about Tom"
+              aria-label="Conversation with TomBot"
               tabindex="0"
             >
               <div class="tom-message tom-answer">
@@ -1001,8 +1031,23 @@
             </div>
             <div
               class="tom-chat-questions"
-              aria-label="Questions about Tom"
+              aria-label="Questions for TomBot"
             ></div>
+            <form class="tom-chat-form" autocomplete="off">
+              <label class="sr-only" for="tombot-input">Type a question for TomBot</label>
+              <input
+                id="tombot-input"
+                class="tom-chat-input"
+                type="text"
+                name="question"
+                placeholder="Or type a question…"
+                maxlength="160"
+                enterkeyhint="send"
+              />
+              <button class="tom-chat-send" type="submit" aria-label="Send question">
+                Send <span aria-hidden="true">↗</span>
+              </button>
+            </form>
             <div
               class="sr-only tom-chat-announcer"
               aria-live="polite"
@@ -1010,7 +1055,7 @@
             ></div>
           </div>
           <div class="faq-list" data-chat-source>
-            <details name="tom-faq" open>
+            <details name="tom-faq" data-keywords="hire, why tom, why you, fit" open>
               <summary>
                 <span class="faq-number">01</span>
                 <span>Why should you hire Tom?</span>
@@ -1025,7 +1070,7 @@
                 </p>
               </div>
             </details>
-            <details name="tom-faq">
+            <details name="tom-faq" data-keywords="sell, sales, approach, process, discovery">
               <summary>
                 <span class="faq-number">02</span>
                 <span>How does he sell?</span>
@@ -1048,7 +1093,7 @@
                 </p>
               </div>
             </details>
-            <details name="tom-faq">
+            <details name="tom-faq" data-keywords="results, numbers, target, quota, achievements, wins">
               <summary>
                 <span class="faq-number">03</span>
                 <span>What are his best results?</span>
@@ -1063,7 +1108,7 @@
                 </p>
               </div>
             </details>
-            <details name="tom-faq">
+            <details name="tom-faq" data-keywords="market, new market, expand, launch, country">
               <summary>
                 <span class="faq-number">04</span>
                 <span>Can he open a market from zero?</span>
@@ -1079,7 +1124,7 @@
                 </p>
               </div>
             </details>
-            <details name="tom-faq">
+            <details name="tom-faq" data-keywords="built, scratch, build, team, start">
               <summary>
                 <span class="faq-number">05</span>
                 <span>Has he built something from scratch?</span>
@@ -1094,7 +1139,7 @@
                 </p>
               </div>
             </details>
-            <details name="tom-faq">
+            <details name="tom-faq" data-keywords="work with, like, personality, culture, team player">
               <summary>
                 <span class="faq-number">06</span>
                 <span>What’s he like to work with?</span>
@@ -1106,6 +1151,48 @@
                   a clear plan, and the odd campervan story. He also loves
                   mentoring: at Exactera, his mentoring helped two junior
                   teammates earn promotions.
+                </p>
+              </div>
+            </details>
+            <details name="tom-faq" data-keywords="sydney, australia, why here, move">
+              <summary>
+                <span class="faq-number">07</span>
+                <span>Why Sydney?</span>
+                <span class="faq-marker" aria-hidden="true">+</span>
+              </summary>
+              <div class="faq-answer">
+                <p>
+                  To study at a world-class university, and to live near his
+                  sister, who’s called Sydney home for more than 15 years. It
+                  also turned out to be the easiest city he’s ever made friends
+                  in, so he’s here for the long term.
+                </p>
+              </div>
+            </details>
+            <details name="tom-faq" data-keywords="bunnings, kmart, hardware">
+              <summary>
+                <span class="faq-number">08</span>
+                <span>Bunnings or Kmart?</span>
+                <span class="faq-marker" aria-hidden="true">+</span>
+              </summary>
+              <div class="faq-answer">
+                <p>
+                  Bunnings, every time. He’s been known to take calls in the
+                  cap.
+                </p>
+              </div>
+            </details>
+            <details name="tom-faq" data-keywords="van, campervan, travel, solar">
+              <summary>
+                <span class="faq-number">09</span>
+                <span>What’s the van story?</span>
+                <span class="faq-marker" aria-hidden="true">+</span>
+              </summary>
+              <div class="faq-answer">
+                <p>
+                  He designed and built an off-grid solar campervan, then lived
+                  in it for six months travelling around Europe before moving to
+                  Australia.
                 </p>
               </div>
             </details>
