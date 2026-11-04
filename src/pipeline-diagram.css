@@ -52,6 +52,10 @@
   stroke: var(--teal);
   stroke-opacity: 0.55;
 }
+.pl-coin-dot {
+  fill: var(--mint);
+  stroke: none;
+}
 .pl-leader {
   stroke: var(--teal);
   stroke-opacity: 0.45;
@@ -74,11 +78,6 @@
   font-weight: 550;
   letter-spacing: 0.1em;
 }
-.pl-num-text.pl-num-close {
-  fill: var(--mint);
-  font-size: 7px;
-  letter-spacing: 0.1em;
-}
 
 /* Horizontal layout: numbers sit on the discs, labels alternate above and below on leader lines. */
 .pl-num {
@@ -93,11 +92,6 @@
   color: var(--muted);
   line-height: 1;
   pointer-events: none;
-}
-.pl-num-close {
-  color: var(--mint);
-  font-size: clamp(7.5px, 0.6vw + 1px, 9px);
-  letter-spacing: 0.06em;
 }
 .pipeline-labels {
   display: contents;

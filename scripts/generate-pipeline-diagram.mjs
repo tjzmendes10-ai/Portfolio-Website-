@@ -18,15 +18,16 @@ const END = "<!-- pipeline-diagram:end -->";
 // Stages left to right. `number: null` marks the Close disc, which is named on the disc and has no label.
 const stages = [
   { number: "01", name: "Pick the door", text: "The market, vertical or account that moves the needle" },
-  { number: "02", name: "Discover", text: "How the client works, the systems they run, where it hurts" },
-  { number: "03", name: "Shape", text: "A solution built around the client, not a product" },
-  { number: "04", name: "Pilot", text: "Start small enough to prove" },
-  { number: null, name: "Close", text: null },
-  { number: "05", name: "Prove", text: "Support the pilot, show the value" },
+  { number: "02", name: "Build the pipe", text: "Self-sourced, outbound, multi-threaded" },
+  { number: "03", name: "Discover", text: "How they work, what they use, where it hurts" },
+  { number: "04", name: "Shape it", text: "Built around their processes, small enough to prove" },
+  // The middle coin: no number or text on it, just a dot. Its label sits outside like the others.
+  { number: null, name: "Commit", text: "A plan both sides sign up to", coin: true },
+  { number: "05", name: "Prove it", text: "Support the pilot, show the value" },
   { number: "06", name: "Expand", text: "New teams, new jurisdictions" },
   { number: "07", name: "Reference", text: "Customers who open the next door" },
 ];
-const CLOSE = stages.findIndex((stage) => stage.number === null);
+const CLOSE = stages.findIndex((stage) => stage.coin);
 const LAST = stages.length - 1;
 
 // Horizontal layout (desktop). Units are SVG units.
@@ -60,23 +61,20 @@ const tall = {
 
 const n = (value) => String(Math.round(value * 100) / 100);
 const lerp = (from, to, t) => from + (to - from) * t;
-// The travelling dots: three enter, one drops out at Shape, the other two pass through Close,
+// The travelling dots: three enter, one drops out at Discover, the other two pass through the coin,
 // then each splits at Expand so four run out past Reference and fade. `k` is a dot's lane as a share of the
-// cone's half-size at that stop: [start, Shape, Close, Expand, end].
-const QUALIFY = stages.findIndex((stage) => stage.name === "Shape");
+// cone's half-size at that stop: [start, Discover, coin, Expand, end].
+const QUALIFY = stages.findIndex((stage) => stage.name === "Discover");
 const EXPAND = stages.findIndex((stage) => stage.name === "Expand");
 const flow = [
   { k: [-0.6, -0.55, -0.3, -0.3, -0.65], from: "start", until: "end" }, // top lane, runs the whole way
-  { k: [0, 0, 0, 0, 0], from: "start", until: "shape" }, // middle lane, drops out at Shape
+  { k: [0, 0, 0, 0, 0], from: "start", until: "discover" }, // middle lane, drops out at Discover
   { k: [0.6, 0.55, 0.3, 0.3, 0.65], from: "start", until: "end" }, // bottom lane, runs the whole way
   { k: [-0.3, -0.3, -0.3, -0.3, -0.22], from: "expand", until: "end" }, // splits off the top lane at Expand
   { k: [0.3, 0.3, 0.3, 0.3, 0.22], from: "expand", until: "end" }, // splits off the bottom lane at Expand
 ];
-const labelSide = (i) => {
-  if (stages[i].text === null) return null;
-  const order = stages.slice(0, i).filter((stage) => stage.text !== null).length;
-  return order % 2 === 0 ? "up" : "down";
-};
+// Labels alternate above and below, so neighbours never share a side (and so never collide).
+const labelSide = (i) => (i % 2 === 0 ? "up" : "down");
 
 // One cone geometry for both orientations. `at(i)` is where disc i's first face sits along the axis,
 // `depth` is the slice thickness, and `size(i)` gives both of its half-sizes straight from the two lines.
@@ -106,7 +104,7 @@ function dotFlow({ start, end, stops, lastFace, centre, profile }) {
   const appears = { start: [start, start + 40], expand: [expand - 10, expand + 10] };
   return flow.map((dot) => ({
     keys: positions.map((position, j) => [round(position), round(centre + dot.k[j] * profile(position))]),
-    // Dots on a lane to the end fade out after the last disc; the middle one fades at Shape.
+    // Dots on a lane to the end fade out after the last disc; the middle one fades at Discover.
     show: [...appears[dot.from], ...(dot.until === "end" ? [lastFace, end] : [qualify - 20, qualify + 10])].map(round),
   }));
 }
@@ -140,6 +138,7 @@ function wideSvg() {
       `  <ellipse class="pl-face" cx="${n(x(i))}" cy="${cy}" rx="${n(rf)}" ry="${n(front)}" />`,
       `  <ellipse class="pl-face-tint" cx="${n(x(i))}" cy="${cy}" rx="${n(rf)}" ry="${n(front)}" />`,
     );
+    if (i === CLOSE) out.push(`  <circle class="pl-coin-dot" cx="${n(x(i))}" cy="${cy}" r="2.6" />`);
     const side = labelSide(i);
     if (side) {
       const lx = x(i) + d / 2;
@@ -197,7 +196,9 @@ function tallSvg() {
       `  <path class="pl-body" d="M${n(cx - top)} ${n(y(i))}L${n(cx - bottom)} ${n(y(i) + t)}A${n(bottom)} ${n(mb)} 0 0 0 ${n(cx + bottom)} ${n(y(i) + t)}L${n(cx + top)} ${n(y(i))}Z" />`,
       `  <ellipse class="pl-face" cx="${cx}" cy="${n(y(i))}" rx="${n(top)}" ry="${n(mt)}" />`,
       `  <ellipse class="pl-face-tint" cx="${cx}" cy="${n(y(i))}" rx="${n(top)}" ry="${n(mt)}" />`,
-      `  <text class="pl-num-text${i === CLOSE ? " pl-num-close" : ""}" x="${cx}" y="${n(y(i) + (i === CLOSE ? 2.5 : 2.6))}" text-anchor="middle" stroke="none">${stage.number ?? stage.name.toUpperCase()}</text>`,
+      i === CLOSE
+        ? `  <circle class="pl-coin-dot" cx="${cx}" cy="${n(y(i))}" r="2.4" />`
+        : `  <text class="pl-num-text" x="${cx}" y="${n(y(i) + 2.6)}" text-anchor="middle" stroke="none">${stage.number}</text>`,
     );
     if (labelSide(i)) {
       const edge = (top + bottom) / 2;
@@ -228,14 +229,15 @@ function block() {
   const pad = (text, spaces) => text.split("\n").map((line) => " ".repeat(spaces) + line).join("\n");
   const numbers = stages
     .map((stage, i) => {
+      if (i === CLOSE) return null;
       const left = ((wide.firstX + wide.pitch * i) / wide.width) * 100;
-      return `<span class="pl-num${i === CLOSE ? " pl-num-close" : ""}" style="--i:${i};--x:${n(left)}%">${stage.number ?? "Close"}</span>`;
+      return `<span class="pl-num" style="--i:${i};--x:${n(left)}%">${stage.number}</span>`;
     })
+    .filter(Boolean)
     .join("\n");
   const items = stages
     .map((stage, i) => {
       const side = labelSide(i);
-      if (!side) return null;
       const left = ((wide.firstX + wide.pitch * i + wide.depth / 2) / wide.width) * 100;
       const text = stage.text.replace("C-suite", '<span class="nb">C-suite</span>');
       return `  <li class="pl-item pl-${side}" style="--i:${i};--x:${n(left)}%;--row:${i + 1}">\n    <span class="pl-label">${stage.name}</span>\n    <span class="pl-desc">${text}</span>\n  </li>`;
@@ -243,7 +245,7 @@ function block() {
     .filter(Boolean)
     .join("\n");
   const screenReader = stages
-    .map((stage) => `  <li>${stage.name}${stage.text ? `: ${stage.text}` : ""}</li>`)
+    .map((stage) => `  <li>${stage.name}: ${stage.text}</li>`)
     .join("\n");
   return [
     `        ${START}`,
