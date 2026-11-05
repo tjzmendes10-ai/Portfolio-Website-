@@ -49,6 +49,15 @@
   stroke: var(--mint);
   stroke-opacity: 1;
 }
+/* The two key stages (03 Diagnose and 04 Design): a brighter outline and a soft glow, nothing more. */
+.pl-disc-key .pl-body,
+.pl-disc-key .pl-face {
+  stroke-opacity: 1;
+  stroke-width: 1.15;
+}
+.pl-disc-key {
+  filter: drop-shadow(0 0 5px rgb(101 203 176 / 0.32));
+}
 .pl-outline {
   stroke: var(--teal);
   stroke-opacity: 0.55;
@@ -68,8 +77,9 @@
 }
 /* The dots only exist while they travel (pipeline-diagram.js sets their opacity); at rest none are shown. */
 .pl-dot {
-  fill: var(--mint);
-  stroke: none;
+  fill: none; /* hollow rings; the stroke stays the same weight as they grow */
+  stroke: var(--mint);
+  stroke-width: 1.2;
   opacity: 0;
 }
 /* Channels feeding the funnel: thin arrows in the same stroke as the leaders, the main one a touch stronger. */
@@ -99,8 +109,9 @@
   opacity: 0;
 }
 .pl-dot-still {
-  fill: var(--mint);
-  stroke: none;
+  fill: none;
+  stroke: var(--mint);
+  stroke-width: 1.2;
 }
 @media (prefers-reduced-motion: reduce) {
   .pl-static {
@@ -183,6 +194,13 @@
   text-transform: uppercase;
   color: var(--muted);
 }
+.pl-key .pl-label {
+  font-weight: 700;
+  color: var(--text);
+}
+.pl-key .pl-desc {
+  color: #c6d9cc;
+}
 .pl-desc {
   display: block;
   margin-top: 6px;
@@ -231,7 +249,7 @@
     margin-top: 32px;
     display: grid;
     grid-template-columns: 120px 1fr;
-    grid-template-rows: auto auto repeat(8, 84px);
+    grid-template-rows: auto auto repeat(8, 92px);
     margin-bottom: 0;
   }
   .pipeline-svg-wide,
@@ -271,7 +289,7 @@
     grid-column: 1;
     grid-row: 3 / -1;
     width: 120px;
-    height: 672px;
+    height: 736px;
   }
   .pipeline-labels {
     display: contents;
