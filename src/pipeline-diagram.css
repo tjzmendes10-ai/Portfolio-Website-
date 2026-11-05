@@ -49,14 +49,11 @@
   stroke: var(--mint);
   stroke-opacity: 1;
 }
-/* The two key stages (03 Diagnose and 04 Design): a brighter outline and a soft glow, nothing more. */
+/* The two key stages (03 Diagnose and 04 Design): a slightly brighter outline, plus the extra thickness set by the generator. */
 .pl-disc-key .pl-body,
 .pl-disc-key .pl-face {
   stroke-opacity: 1;
   stroke-width: 1.15;
-}
-.pl-disc-key {
-  filter: drop-shadow(0 0 5px rgb(101 203 176 / 0.32));
 }
 .pl-outline {
   stroke: var(--teal);
@@ -82,7 +79,7 @@
   stroke-width: 1.2;
   opacity: 0;
 }
-/* Channels feeding the funnel: thin arrows in the same stroke as the leaders, the main one a touch stronger. */
+/* Channels feeding the funnel: thin arrows in the same stroke as the leaders. */
 .pl-in,
 .pl-in-head {
   stroke: var(--teal);
@@ -90,19 +87,6 @@
 }
 .pl-in-head {
   stroke-linejoin: round;
-}
-.pl-feed-main .pl-in,
-.pl-feed-main .pl-in-head {
-  stroke-width: 1.5;
-  stroke-opacity: 0.85;
-}
-/* The small return icon before REFERRALS, in the same accent as the discs. */
-.pl-return {
-  margin-right: 0.55em;
-  color: var(--teal);
-  font-size: 1.45em;
-  vertical-align: -0.12em;
-  line-height: 1;
 }
 /* Reduced motion: a still picture of the dots (five at the inputs, three at Commit, three larger at the end). */
 .pl-static {
@@ -160,9 +144,6 @@
   line-height: 1.4;
   text-transform: uppercase;
   color: var(--muted);
-}
-.pl-channel-main {
-  color: var(--text);
 }
 .pl-channels-down {
   display: none;
@@ -274,9 +255,6 @@
     padding: 5px 10px;
     border: 1px solid var(--line);
     border-radius: 999px;
-  }
-  .pl-channel-main {
-    border-color: #a9d1b559;
   }
   .pl-channels-down {
     display: block;

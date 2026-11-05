@@ -19,22 +19,21 @@ const END = "<!-- pipeline-diagram:end -->";
 const stages = [
   { number: "01", name: "Pick the door", text: "Organisations, in any industry, with a problem worth solving" },
   { number: "02", name: "Get in the room", text: "With the people who own the outcome. Questions first" },
-  { number: "03", name: "Diagnose", text: "Start with their goals, then map how the work really gets done and where it’s slow, costly or stuck", key: true },
-  { number: "04", name: "Design", text: "A solution tailored to them: what it does, what it’s worth, and where to start", key: true },
+  { number: "03", name: "Diagnose", text: "Start with the client’s objectives, then map how the work gets done and where it’s slow, costly or stuck", key: true },
+  { number: "04", name: "Design", text: "A solution tailored to the business needs: what it does, what it’s worth, and where to start", key: true },
   // The middle coin: no number or text on it, just a dot. Its label sits outside like the others.
   { number: null, name: "Commit", text: "A first phase both sides agree, small enough to prove", coin: true },
   { number: "05", name: "Deliver", text: "With the delivery team, built around how they work, measured against what we agreed" },
   { number: "06", name: "Scale", text: "More use cases, teams and markets" },
   { number: "07", name: "Advocate", text: "Clients who open the next door" },
 ];
-// The ways in: five channels feed the wide mouth of the funnel, top to bottom. `main` is drawn a touch stronger.
-// Referrals carries a small return icon (↺).
+// The ways in: five channels feed the wide mouth of the funnel, top to bottom.
 const channels = [
-  { name: "Warm intros & network", main: true },
+  { name: "Warm intros & network" },
   { name: "Outbound" },
   { name: "Partnerships" },
   { name: "Conferences & events" },
-  { name: "Referrals", icon: "↺" },
+  { name: "Referrals" },
 ];
 const CLOSE = stages.findIndex((stage) => stage.coin);
 const LAST = stages.length - 1;
@@ -181,7 +180,7 @@ function wideSvg() {
     const wing = (turn) =>
       `${n(x1 - 5.5 * Math.cos(angle + turn))} ${n(y1 - 5.5 * Math.sin(angle + turn))}`;
     return [
-      `<g class="pl-feed${channel.main ? " pl-feed-main" : ""}" style="--i:${k}">`,
+      `<g class="pl-feed" style="--i:${k}">`,
       `  <line class="pl-in" x1="${n(x0)}" y1="${n(y0)}" x2="${n(x1)}" y2="${n(y1)}" />`,
       `  <path class="pl-in-head" d="M${wing(0.5)}L${n(x1)} ${n(y1)}L${wing(-0.5)}" />`,
       `</g>`,
@@ -346,12 +345,11 @@ function block() {
     .map((channel, k) => {
       const top = ((wide.centreY + (k - mid) * wide.rowSpread) / wide.height) * 100;
       const name = channel.name.replace("&", "&amp;");
-      const icon = channel.icon ? `<span class="pl-return" aria-hidden="true">${channel.icon}</span>` : "";
-      return `  <li class="pl-channel${channel.main ? " pl-channel-main" : ""}" style="--i:${k};--y:${n(top)}%;--w:${n((wide.labelRight / wide.width) * 100)}%">${icon}${name}</li>`;
+      return `  <li class="pl-channel" style="--i:${k};--y:${n(top)}%;--w:${n((wide.labelRight / wide.width) * 100)}%">${name}</li>`;
     })
     .join("\n");
   const channelNames = channels.map((channel) => channel.name.replace("&", "&amp;"));
-  const summary = `Five channels feed the funnel: ${channelNames.slice(0, -1).join(", ")} and ${channelNames.at(-1)}. Referrals is marked with a return icon.`;
+  const summary = `Five channels feed the funnel: ${channelNames.slice(0, -1).join(", ")} and ${channelNames.at(-1)}.`;
   const screenReader = stages
     .map((stage) => `  <li>${stage.name}: ${stage.text}</li>`)
     .join("\n");
