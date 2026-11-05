@@ -92,6 +92,24 @@
 .pl-static {
   opacity: 0;
 }
+/* The finish: the three dots that reach the end become smiley faces and stay (the animation fades them in). */
+.pl-smiley,
+.pl-smiley-still {
+  fill: none;
+  stroke: var(--mint);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+.pl-smiley {
+  opacity: 0;
+}
+.pipeline.is-smiling .pl-smiley {
+  opacity: 1;
+}
+.pl-smile-eye {
+  fill: var(--mint);
+  stroke: none;
+}
 .pl-dot-still {
   fill: none;
   stroke: var(--mint);
