@@ -195,8 +195,8 @@
   color: var(--muted);
 }
 .pl-key .pl-label {
-  font-weight: 700;
-  color: var(--text);
+  font-weight: 650;
+  color: #fff;
 }
 .pl-key .pl-desc {
   color: #c6d9cc;
@@ -326,4 +326,10 @@
   .anz-background .anz-map-stage {
     transition: none;
   }
+}
+
+/* Approach step 02 (Understand before you pitch) carries the same quiet emphasis as DIAGNOSE and DESIGN above. */
+.approach-steps .step-key h3 {
+  font-weight: 650;
+  color: #fff;
 }
