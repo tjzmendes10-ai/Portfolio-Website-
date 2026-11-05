@@ -138,16 +138,34 @@ function dotRoutes({ entry, at, depth, centre, profile, radius, lagScale, drift 
         spot(at(LAST) + depth(LAST) + 10, radius * GROW, 0, 0, SPREAD),
       );
     }
-    return { lag: Math.round(lag * lagScale), stops };
+    return { lag: Math.round(lag * lagScale), smile: !drop, stops };
   });
 }
-// The reduced-motion picture: five dots at the inputs, three at Commit, three larger at the last disc.
+// The reduced-motion picture: five dots at the inputs, three at Commit, three smiley faces at the last disc.
 function staticDots({ inputs, at, depth, centre, profile, radius, closeHalf }) {
   const survivors = dots.filter((dot) => !dot.drop);
   return [
     ...inputs.map(([a, b]) => [a, b, radius]),
     ...survivors.map(({ lane }) => [at(CLOSE) + depth(CLOSE) / 2, centre + lane * closeHalf, radius]),
-    ...survivors.map(({ lane }) => [at(LAST) + depth(LAST), centre + lane * SPREAD * profile(at(LAST) + depth(LAST)), radius * GROW]),
+    ...survivors.map(({ lane }) => [
+      at(LAST) + depth(LAST) + 10,
+      centre + lane * SPREAD * profile(at(LAST) + depth(LAST) + 10),
+      radius * GROW,
+      true,
+    ]),
+  ];
+}
+// A smiley face at (x, y): the dot's ring, two eyes and a smile. `flip` swaps the axes for the vertical drawing.
+function smiley(a, b, r, cls, flip, extra = "") {
+  const [x, y] = flip ? [b, a] : [a, b];
+  const k = (value) => n(value * r);
+  return [
+    `<g class="${cls}"${extra} transform="translate(${n(x)} ${n(y)})">`,
+    `  <circle r="${n(r)}" />`,
+    `  <circle class="pl-smile-eye" cx="${k(-0.33)}" cy="${k(-0.2)}" r="0.9" />`,
+    `  <circle class="pl-smile-eye" cx="${k(0.33)}" cy="${k(-0.2)}" r="0.9" />`,
+    `  <path d="M${k(-0.46)} ${k(0.12)}Q0 ${k(0.66)} ${k(0.46)} ${k(0.12)}" />`,
+    `</g>`,
   ];
 }
 
@@ -238,11 +256,18 @@ function wideSvg() {
   // Reduced motion shows this still picture instead (see pipeline-diagram.css).
   out.push(
     `<g class="pl-static">`,
-    ...staticDots({ inputs, at: x, depth: d, centre: cy, profile, radius, closeHalf: wide.closeHeight }).map(
-      ([a, b, r]) => `  <circle class="pl-dot-still" cx="${n(a)}" cy="${n(b)}" r="${n(r)}" />`,
+    ...staticDots({ inputs, at: x, depth: d, centre: cy, profile, radius, closeHalf: wide.closeHeight }).flatMap(
+      ([a, b, r, face]) =>
+        face ? smiley(a, b, r, "pl-smiley-still", false) : [`  <circle class="pl-dot-still" cx="${n(a)}" cy="${n(b)}" r="${n(r)}" />`],
     ),
     `</g>`,
   );
+  // The animated finish: the three dots that reach the end turn into smiley faces and stay.
+  routes.forEach((route, j) => {
+    if (!route.smile) return;
+    const [at7, across7, r7] = route.stops.at(-1);
+    out.push(...smiley(at7, across7, r7, "pl-smiley", false, ` data-smile="${j}"`));
+  });
   flowData = JSON.stringify({ axis: "x", start, end: Math.round(end), ms: Math.round((end - start) * 7), dots: routes });
   return `<svg class="pipeline-svg pipeline-svg-wide" data-flow='${flowData}' viewBox="0 0 ${wide.width} ${wide.height}" fill="none" stroke-linecap="round" focusable="false" aria-hidden="true">\n${out.map((line) => `  ${line}`).join("\n")}\n</svg>`;
 }
@@ -314,9 +339,16 @@ function tallSvg() {
       profile,
       radius,
       closeHalf: tall.closeHalfWidth,
-    }).map(([a, b, r]) => `  <circle class="pl-dot-still" cx="${n(b)}" cy="${n(a)}" r="${n(r)}" />`),
+    }).flatMap(([a, b, r, face]) =>
+      face ? smiley(a, b, r, "pl-smiley-still", true) : [`  <circle class="pl-dot-still" cx="${n(b)}" cy="${n(a)}" r="${n(r)}" />`],
+    ),
     `</g>`,
   );
+  routes.forEach((route, j) => {
+    if (!route.smile) return;
+    const [at7, across7, r7] = route.stops.at(-1);
+    out.push(...smiley(at7, across7, r7, "pl-smiley", true, ` data-smile="${j}"`));
+  });
   const flowData = JSON.stringify({ axis: "y", start: 4, end: Math.round(end), ms: 6000, dots: routes });
   return `<svg class="pipeline-svg pipeline-svg-tall" data-flow='${flowData}' viewBox="0 0 ${tall.width} ${height}" width="${tall.width}" height="${height}" fill="none" stroke-linecap="round" focusable="false" aria-hidden="true">\n${out.map((line) => `  ${line}`).join("\n")}\n</svg>`;
 }

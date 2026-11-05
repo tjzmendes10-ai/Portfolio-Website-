@@ -1,9 +1,10 @@
 // The diagram is static inline SVG, so it works with no JavaScript. This only adds the animation: the discs appear
-// one by one, then dots flow through on a loop. Five start at the input arrows and converge on disc 01; one drops out
+// one by one, then dots flow through twice and stop, so they don't distract from reading. On the last pass the three dots that reach the end turn into smiley faces and stay. Five start at the input arrows and converge on disc 01; one drops out
 // (fading and drifting away) between 01 and 02 and another between 03 and 04; the other three pass Commit, grow a
-// little between 06 and 07, and fade out at 07. After a short pause it starts again.
+// little between 06 and 07, and fade out at 07. After a short pause it goes through once more, then the diagram stays still.
 // The generator (scripts/generate-pipeline-diagram.mjs) writes each dot's route into the SVG's data-flow.
 const DRAW_MS = 1000; // the discs stagger in over about 1.5s; the dots start as the last ones arrive
+const PASSES = 2; // how many times the dots go through
 const PAUSE_MS = 1400; // rest between one pass and the next
 const INTRO_MS = 450; // the dots fade in at the inputs at the start of each pass
 const clamp = (value) => Math.max(0, Math.min(1, value));
@@ -55,19 +56,22 @@ function play(figure, still) {
     node: svg.querySelector(`.pl-dot[data-dot="${index}"]`),
   }));
   const cycle = ms + PAUSE_MS;
+  const faces = new Map([...svg.querySelectorAll(".pl-smiley")].map((node) => [node.dataset.smile, node]));
 
   figure.classList.add("is-playing");
   let clock = -DRAW_MS; // time spent visible; it stands still while the diagram is off screen
   let last = 0;
   let frameId = 0;
   let visible = true;
+  let finished = false;
 
   const draw = () => {
     const local = clock < 0 ? 0 : clock % cycle;
     const progress = clock < 0 ? 0 : clamp(local / ms);
     const position = start + (end - start) * ease(progress);
     const intro = clock < 0 ? 0 : clamp(local / INTRO_MS);
-    dots.forEach(({ node, stops, lag }) => {
+    dots.forEach((dot) => {
+      const { node, stops, lag } = dot;
       // Each dot sets off a little after the last, so they travel as a loose group.
       const at = start + Math.max(0, position - start - lag);
       const [crossing, radius, opacity] = between(stops, at);
@@ -75,6 +79,9 @@ function play(figure, still) {
       node.setAttribute(across, crossing.toFixed(2));
       node.setAttribute("r", radius.toFixed(2));
       node.style.opacity = (opacity * intro).toFixed(3);
+      // On the last pass the ring fades into a smiley face in the same spot.
+      const face = faces.get(String(dots.indexOf(dot)));
+      if (face) face.style.opacity = clock >= cycle * (PASSES - 1) ? (1 - opacity).toFixed(3) : "";
     });
   };
   const frame = (now) => {
@@ -82,11 +89,19 @@ function play(figure, still) {
     if (!visible || still.matches) return;
     clock += last ? Math.min(now - last, 100) : 0;
     last = now;
+    // After the last pass the dots are gone and nothing more runs.
+    if (clock >= cycle * (PASSES - 1) + ms) {
+      finished = true;
+      dots.forEach(({ node }) => (node.style.opacity = ""));
+      faces.forEach((face) => (face.style.opacity = ""));
+      figure.classList.add("is-smiling");
+      return;
+    }
     draw();
     frameId = requestAnimationFrame(frame);
   };
   const run = () => {
-    if (frameId || !visible || still.matches) return;
+    if (frameId || finished || !visible || still.matches) return;
     last = 0;
     frameId = requestAnimationFrame(frame);
   };
