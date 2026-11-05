@@ -1,13 +1,14 @@
-// The diagram is static inline SVG, so it works with no JavaScript. This only adds a one-off animation:
-// the discs appear one by one, then dots flow through. Three enter, one drops out at Discover, the other
-// two pass through Close, split at Expand into four, and run out past Reference and fade.
+// The diagram is static inline SVG, so it works with no JavaScript. This only adds the animation: the discs appear
+// one by one, then dots flow through on a loop. Five start at the input arrows and converge on disc 01; one drops out
+// (fading and drifting away) between 01 and 02 and another between 03 and 04; the other three pass Commit, grow a
+// little between 06 and 07, and fade out at 07. After a short pause it starts again.
 // The generator (scripts/generate-pipeline-diagram.mjs) writes each dot's route into the SVG's data-flow.
 const DRAW_MS = 1000; // the discs stagger in over about 1.5s; the dots start as the last ones arrive
-const BASE_MS = 5200; // the journey's pace everywhere else: a gentle ease in and out
-const DWELL = 0.09; // extra time spent passing each of Discover and Expand, as a share of BASE_MS (about 0.5s)
-const DWELL_WIDTH = 0.045; // how far either side of those stops the slow-down reaches, as a share of the journey
-const FLOW_MS = BASE_MS * (1 + 2 * DWELL); // the whole journey, including the two slow passes
+const PAUSE_MS = 1400; // rest between one pass and the next
+const INTRO_MS = 450; // the dots fade in at the inputs at the start of each pass
 const clamp = (value) => Math.max(0, Math.min(1, value));
+// The same gentle ease in and out as before (distance against time).
+const ease = (time) => (1 - Math.cos(Math.PI * clamp(time))) / 2;
 
 export function initPipelineDiagram() {
   const figure = document.querySelector(".pipeline");
@@ -21,97 +22,99 @@ export function initPipelineDiagram() {
     ([entry]) => {
       if (!entry.isIntersecting) return;
       observer.disconnect();
-      play(figure);
+      play(figure, still);
     },
     { threshold: 0.35 },
   );
   observer.observe(figure);
 }
 
-// Value at `position` along a list of [position, value] stops (flat outside the first and last).
+// Value at `position` along a list of [position, ...values] stops (flat before the first and after the last).
 function between(stops, position) {
-  if (position <= stops[0][0]) return stops[0][1];
+  if (position <= stops[0][0]) return stops[0].slice(1);
   for (let i = 1; i < stops.length; i++) {
-    const [to, toValue] = stops[i];
+    const [to, ...toValues] = stops[i];
     if (position <= to) {
-      const [from, fromValue] = stops[i - 1];
-      return fromValue + ((toValue - fromValue) * (position - from)) / (to - from);
+      const [from, ...fromValues] = stops[i - 1];
+      const share = (position - from) / (to - from);
+      return fromValues.map((value, k) => value + (toValues[k] - value) * share);
     }
   }
-  return stops.at(-1)[1];
+  return stops.at(-1).slice(1);
 }
 
-// Maps time (0 to 1) to distance along the journey (0 to 1). It is the original ease in and out, with a little
-// extra time added only while the dots pass each stop in `slows`, so those two passes slow down and the rest of the
-// journey keeps its speed.
-function pacing(slows) {
-  const smooth = (x) => {
-    const t = clamp(x);
-    return t * t * (3 - 2 * t);
-  };
-  // Time taken to reach distance s: the plain ease, plus the dwell added around each stop.
-  const timeAt = (s) =>
-    Math.acos(1 - 2 * clamp(s)) / Math.PI +
-    slows.reduce((sum, at) => sum + DWELL * smooth((s - (at - DWELL_WIDTH)) / (2 * DWELL_WIDTH)), 0);
-  const steps = 800;
-  const times = Array.from({ length: steps + 1 }, (_, i) => timeAt(i / steps));
-  const total = times[steps];
-  return (time) => {
-    const target = clamp(time) * total;
-    let low = 0;
-    let high = steps;
-    while (high - low > 1) {
-      const mid = (low + high) >> 1;
-      if (times[mid] <= target) low = mid;
-      else high = mid;
-    }
-    const span = times[high] - times[low] || 1;
-    return (low + (target - times[low]) / span) / steps;
-  };
-}
-
-function play(figure) {
+function play(figure, still) {
   // Whichever drawing is on screen (horizontal or vertical) gets the travelling dots.
   const svg = [...figure.querySelectorAll(".pipeline-svg")].find(
     (node) => getComputedStyle(node).display !== "none",
   );
-  const { axis, start, end, slow, dots: routes } = JSON.parse(svg.dataset.flow);
-  const travelled = pacing(slow.map((stop) => (stop - start) / (end - start)));
+  const { axis, start, end, ms, dots: routes } = JSON.parse(svg.dataset.flow);
   const [along, across] = axis === "x" ? ["cx", "cy"] : ["cy", "cx"];
   const dots = routes.map((route, index) => ({
     ...route,
     node: svg.querySelector(`.pl-dot[data-dot="${index}"]`),
   }));
-  const rest = dots.map(({ node }) => ({
-    node,
-    cx: node.getAttribute("cx"),
-    cy: node.getAttribute("cy"),
-  }));
+  const cycle = ms + PAUSE_MS;
 
   figure.classList.add("is-playing");
-  const begin = performance.now() + DRAW_MS;
-  const frame = (now) => {
-    const elapsed = now - begin;
-    if (elapsed < 0) return requestAnimationFrame(frame);
-    const progress = clamp(elapsed / FLOW_MS);
-    const position = start + (end - start) * travelled(progress);
-    dots.forEach(({ node, keys, show: [from, full, fade, gone] }) => {
-      node.setAttribute(along, position.toFixed(2));
-      node.setAttribute(across, between(keys, position).toFixed(2));
-      const visible = clamp((position - from) / (full - from)) * clamp((gone - position) / (gone - fade));
-      node.style.opacity = visible.toFixed(3);
+  let clock = -DRAW_MS; // time spent visible; it stands still while the diagram is off screen
+  let last = 0;
+  let frameId = 0;
+  let visible = true;
+
+  const draw = () => {
+    const local = clock < 0 ? 0 : clock % cycle;
+    const progress = clock < 0 ? 0 : clamp(local / ms);
+    const position = start + (end - start) * ease(progress);
+    const intro = clock < 0 ? 0 : clamp(local / INTRO_MS);
+    dots.forEach(({ node, stops, lag }) => {
+      // Each dot sets off a little after the last, so they travel as a loose group.
+      const at = start + Math.max(0, position - start - lag);
+      const [crossing, radius, opacity] = between(stops, at);
+      node.setAttribute(along, at.toFixed(2));
+      node.setAttribute(across, crossing.toFixed(2));
+      node.setAttribute("r", radius.toFixed(2));
+      node.style.opacity = (opacity * intro).toFixed(3);
     });
-    if (progress < 1) return requestAnimationFrame(frame);
-    // Put every dot back where the markup has it (hidden), then hand back to plain CSS.
-    rest.forEach(({ node, cx, cy }) => {
-      node.setAttribute("cx", cx);
-      node.setAttribute("cy", cy);
-      node.style.opacity = "";
-    });
-    figure.classList.remove("is-armed", "is-playing");
-    figure.classList.add("is-done");
   };
-  requestAnimationFrame(frame);
+  const frame = (now) => {
+    frameId = 0;
+    if (!visible || still.matches) return;
+    clock += last ? Math.min(now - last, 100) : 0;
+    last = now;
+    draw();
+    frameId = requestAnimationFrame(frame);
+  };
+  const run = () => {
+    if (frameId || !visible || still.matches) return;
+    last = 0;
+    frameId = requestAnimationFrame(frame);
+  };
+  const halt = () => {
+    cancelAnimationFrame(frameId);
+    frameId = 0;
+  };
+
+  // Pause while the diagram is off screen (or the tab is hidden), carry on where it left off.
+  new IntersectionObserver(
+    ([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible) run();
+      else halt();
+    },
+    { threshold: 0 },
+  ).observe(figure);
+  still.addEventListener("change", () => {
+    if (still.matches) {
+      halt();
+      dots.forEach(({ node }) => (node.style.opacity = ""));
+    } else run();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) halt();
+    else run();
+  });
+  run();
 }
 
 // The map steps back and softens while the diagram is in view, so the discs and labels read cleanly.

@@ -17,6 +17,7 @@
 .pipeline-visual {
   position: relative;
   margin-top: 40px;
+  margin-bottom: 3%;
 }
 .pipeline-svg {
   display: block;
@@ -71,6 +72,41 @@
   stroke: none;
   opacity: 0;
 }
+/* Channels feeding the funnel: thin arrows in the same stroke as the leaders, the main one a touch stronger. */
+.pl-in,
+.pl-in-head {
+  stroke: var(--teal);
+  stroke-opacity: 0.5;
+}
+.pl-in-head {
+  stroke-linejoin: round;
+}
+.pl-feed-main .pl-in,
+.pl-feed-main .pl-in-head {
+  stroke-width: 1.5;
+  stroke-opacity: 0.85;
+}
+/* The small return icon before REFERRALS, in the same accent as the discs. */
+.pl-return {
+  margin-right: 0.55em;
+  color: var(--teal);
+  font-size: 1.45em;
+  vertical-align: -0.12em;
+  line-height: 1;
+}
+/* Reduced motion: a still picture of the dots (five at the inputs, three at Commit, three larger at the end). */
+.pl-static {
+  opacity: 0;
+}
+.pl-dot-still {
+  fill: var(--mint);
+  stroke: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pl-static {
+    opacity: 1;
+  }
+}
 .pl-num-text {
   fill: var(--muted);
   font-family: "DM Sans", sans-serif;
@@ -93,16 +129,40 @@
   line-height: 1;
   pointer-events: none;
 }
-.pipeline-labels {
+.pipeline-labels,
+.pl-channels {
   display: contents;
   list-style: none;
   margin: 0;
   padding: 0;
 }
+.pl-channel {
+  position: absolute;
+  left: 0;
+  top: var(--y);
+  width: var(--w);
+  transform: translateY(-50%);
+  text-align: right;
+  font-size: 11px;
+  font-weight: 550;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pl-channel-main {
+  color: var(--text);
+}
+.pl-channels-down {
+  display: none;
+  stroke: var(--teal);
+  stroke-opacity: 0.55;
+  stroke-width: 1.1;
+}
 .pl-item {
   position: absolute;
   left: var(--x);
-  width: clamp(150px, 17vw, 240px);
+  width: clamp(140px, 14.5vw, 205px);
   transform: translateX(-50%);
   text-align: center;
 }
@@ -129,16 +189,25 @@
   font-size: 12px;
   line-height: 1.55;
   color: #9cb5a5;
+  /* Even line lengths, so a description never ends on a single orphan word. */
+  text-wrap: balance;
 }
 
 /* Appear one by one. Only armed by pipeline-diagram.js when motion is allowed; otherwise the finished diagram shows. */
 .pipeline.is-armed .pl-disc,
 .pipeline.is-armed .pl-item,
-.pipeline.is-armed .pl-num {
+.pipeline.is-armed .pl-num,
+.pipeline.is-armed .pl-feed,
+.pipeline.is-armed .pl-channel {
   opacity: 0;
 }
 .pipeline.is-armed .pl-disc {
   transform: translateX(-10px);
+}
+.pipeline.is-playing .pl-feed,
+.pipeline.is-playing .pl-channel {
+  opacity: 1;
+  transition: opacity 0.5s ease calc(var(--i, 0) * 90ms);
 }
 .pipeline.is-playing .pl-disc,
 .pipeline.is-playing .pl-item,
@@ -162,18 +231,47 @@
     margin-top: 32px;
     display: grid;
     grid-template-columns: 120px 1fr;
-    grid-template-rows: repeat(8, 76px);
+    grid-template-rows: auto auto repeat(8, 84px);
+    margin-bottom: 0;
   }
   .pipeline-svg-wide,
   .pl-num {
     display: none;
   }
+  /* The channels become a row of small tags above the funnel, with one arrow down into it. */
+  .pl-channels {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pl-channel {
+    position: static;
+    transform: none;
+    width: auto;
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 5px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+  .pl-channel-main {
+    border-color: #a9d1b559;
+  }
+  .pl-channels-down {
+    display: block;
+    grid-column: 1;
+    grid-row: 2;
+    margin: 8px 0 4px 40px;
+  }
   .pipeline-svg-tall {
     display: block;
     grid-column: 1;
-    grid-row: 1 / -1;
+    grid-row: 3 / -1;
     width: 120px;
-    height: 608px;
+    height: 672px;
   }
   .pipeline-labels {
     display: contents;
@@ -184,7 +282,7 @@
     position: static;
     transform: none;
     grid-column: 2;
-    grid-row: var(--row);
+    grid-row: calc(var(--row) + 2);
     align-self: center;
     width: auto;
     padding: 0 0 0 4px;
