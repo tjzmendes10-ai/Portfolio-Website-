@@ -24,7 +24,7 @@ const stages = [
   // The middle coin: no number or text on it, just a dot. Its label sits outside like the others.
   { number: null, name: "Commit", text: "A first phase both sides agree, small enough to prove", coin: true },
   { number: "05", name: "Deliver", text: "With the delivery team, built around how they work, measured against what we agreed" },
-  { number: "06", name: "Scale", text: "More use cases, teams and markets" },
+  { number: "06", name: "Scale", text: "Upsell and cross-sell: more use cases, teams and markets" },
   { number: "07", name: "Advocate", text: "Clients who open the next door" },
 ];
 // The ways in: five channels feed the wide mouth of the funnel, top to bottom.
