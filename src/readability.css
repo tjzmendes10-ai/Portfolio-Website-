@@ -171,3 +171,40 @@
 .timeline .timeline-now > p {
   margin-top: 8px;
 }
+
+/* Portrait beside the "The person" heading. */
+.about-heading > div {
+  display: grid;
+  grid-template-columns: 176px minmax(0, 1fr);
+  gap: 34px;
+  align-items: center;
+}
+.about-portrait {
+  width: 176px;
+  aspect-ratio: 4 / 5;
+  height: auto;
+  object-fit: cover;
+  object-position: 50% 24%;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+.about-heading-copy > h2 {
+  margin: 0;
+}
+.about-heading-copy > p {
+  max-width: 52ch;
+  margin: 22px 0 0;
+  font-size: 17px;
+  line-height: 1.7;
+  color: #c3d8ca;
+  text-wrap: pretty;
+}
+@media (max-width: 720px) {
+  .about-heading > div {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .about-portrait {
+    width: 132px;
+  }
+}
