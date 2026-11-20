@@ -3,7 +3,7 @@ import { initAnzBackground } from "./anz-background.js";
 import "./portfolio-update.css";
 import "./pipeline-diagram.css";
 import "./tombot.css";
-import { initCounters } from "./portfolio-interactions.js";
+import "./readability.css";
 import { initTomBot } from "./tombot.js";
 import { initAiTools } from "./ai-tools.js";
 import { initAnzTextScrim } from "./anz-text-scrim.js";
@@ -68,6 +68,5 @@ questions.forEach((question) =>
 initAnzBackground();
 initAnzTextScrim();
 initAiTools();
-initCounters();
 initTomBot();
 initPipelineDiagram();
