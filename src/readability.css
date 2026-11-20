@@ -208,3 +208,8 @@
     width: 132px;
   }
 }
+
+/* The hero used a percentage row gap, which the browser cannot size until the hero height is known, so the bottom bar spilled into the next section. A fixed row gap keeps it inside. */
+.hero {
+  row-gap: 24px;
+}
