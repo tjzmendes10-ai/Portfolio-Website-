@@ -284,7 +284,7 @@
   color: #a9c0b3;
 }
 
-/* Client logos scroll across in one continuous row. The list is printed twice so the loop has no gap; the second copy is hidden from screen readers. Logos are grouped under one sector label. */
+/* Client logos scroll across in one continuous row. The list is printed twice so the loop has no gap; the second copy is hidden from screen readers. Logos are grouped under one sector label, centred above its group. */
 .client-experience > .client-marquee {
   display: flex;
   flex-direction: row;
@@ -308,7 +308,7 @@
 }
 .client-track li {
   flex-shrink: 0;
-  text-align: left;
+  text-align: center;
   white-space: nowrap;
   font-family: "Manrope", sans-serif;
   font-size: 19px;
@@ -317,6 +317,7 @@
 }
 .client-logos {
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 34px;
   min-height: 64px;
