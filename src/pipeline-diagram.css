@@ -92,7 +92,7 @@
 .pl-static {
   opacity: 0;
 }
-/* The finish: the three dots that reach the end become smiley faces and stay (the animation fades them in). */
+/* The finish: the three dots that reach the end stay as plain rings (the animation fades them in). */
 .pl-smiley,
 .pl-smiley-still {
   fill: none;
@@ -105,10 +105,6 @@
 }
 .pipeline.is-smiling .pl-smiley {
   opacity: 1;
-}
-.pl-smile-eye {
-  fill: var(--mint);
-  stroke: none;
 }
 .pl-dot-still {
   fill: none;

@@ -1,5 +1,5 @@
 // The diagram is static inline SVG, so it works with no JavaScript. This only adds the animation: the discs appear
-// one by one, then dots flow through twice and stop, so they don't distract from reading. On the last pass the three dots that reach the end turn into smiley faces and stay. Five start at the input arrows and converge on disc 01; one drops out
+// one by one, then dots flow through twice and stop, so they don't distract from reading. On the last pass the three dots that reach the end stay as plain rings. Five start at the input arrows and converge on disc 01; one drops out
 // (fading and drifting away) between 01 and 02 and another between 03 and 04; the other three pass Commit, grow a
 // little between 06 and 07, and fade out at 07. After a short pause it goes through once more, then the diagram stays still.
 // The generator (scripts/generate-pipeline-diagram.mjs) writes each dot's route into the SVG's data-flow.
@@ -79,7 +79,7 @@ function play(figure, still) {
       node.setAttribute(across, crossing.toFixed(2));
       node.setAttribute("r", radius.toFixed(2));
       node.style.opacity = (opacity * intro).toFixed(3);
-      // On the last pass the ring fades into a smiley face in the same spot.
+      // On the last pass the moving ring hands over to a fixed ring in the same spot.
       const face = faces.get(String(dots.indexOf(dot)));
       if (face) face.style.opacity = clock >= cycle * (PASSES - 1) ? (1 - opacity).toFixed(3) : "";
     });
