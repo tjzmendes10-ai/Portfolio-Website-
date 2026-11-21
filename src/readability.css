@@ -284,7 +284,7 @@
   color: #a9c0b3;
 }
 
-/* Client logos scroll across in one continuous row. The list is printed twice so the loop has no gap; the second copy is hidden from screen readers. Hovering pauses it. */
+/* Client logos scroll across in one continuous row. The list is printed twice so the loop has no gap; the second copy is hidden from screen readers. Logos are grouped under one sector label. */
 .client-experience > .client-marquee {
   display: flex;
   flex-direction: row;
@@ -306,9 +306,6 @@
   list-style: none;
   animation: client-scroll 48s linear infinite;
 }
-.client-marquee:hover .client-track {
-  animation-play-state: paused;
-}
 .client-track li {
   flex-shrink: 0;
   text-align: left;
@@ -317,6 +314,28 @@
   font-size: 19px;
   letter-spacing: -0.02em;
   color: #d5e5da;
+}
+.client-logos {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+  min-height: 64px;
+}
+.client-named {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.client-named b {
+  font-family: "Manrope", sans-serif;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #fff;
+  opacity: 0.82;
+}
+.client-track li img.client-tall {
+  height: 64px;
 }
 .client-track li img {
   display: block;
@@ -329,7 +348,7 @@
   filter: brightness(0) invert(1);
   opacity: 0.82;
 }
-.client-track li span {
+.client-track li > span {
   display: block;
   margin-bottom: 6px;
   font-family: "DM Sans", sans-serif;
@@ -354,6 +373,16 @@
   .client-track li img {
     height: 32px;
     max-width: 200px;
+  }
+  .client-track li img.client-tall {
+    height: 52px;
+  }
+  .client-logos {
+    gap: 26px;
+    min-height: 52px;
+  }
+  .client-named b {
+    font-size: 16px;
   }
   @keyframes client-scroll {
     to {
