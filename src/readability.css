@@ -229,8 +229,13 @@
 }
 .quotes-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(20px, 3vw, 36px);
+}
+@media (max-width: 760px) {
+  .quotes-list {
+    grid-template-columns: 1fr;
+  }
 }
 .quote-card {
   display: flex;
