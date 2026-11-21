@@ -236,7 +236,7 @@ export function initAnzBackground() {
   const launches = [
     { id: "oslo", text: "Norway", side: 1, lift: 0 },
     { id: "athens", text: "Greece", side: 1, lift: 20 },
-    { id: "berlin", text: "Germany · property", side: 1, lift: 16 },
+    { id: "berlin", text: "German property", side: 1, lift: 16 },
     { id: "bremen", text: "Renewable energy", side: -1, lift: 14 },
     { id: "reykjavik", text: "Iceland", side: 1, lift: -12 },
   ].map(({ id, text, side, lift }) => {
