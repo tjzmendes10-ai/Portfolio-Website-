@@ -141,7 +141,8 @@
   color: #86a590;
 }
 .tom-chat-input:focus-visible {
-  outline: none;
+  outline: 2px solid #91bd9f;
+  outline-offset: 2px;
   border-color: #91bd9f;
   background: #12301f;
 }
