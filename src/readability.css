@@ -173,20 +173,15 @@
 }
 
 /* Portrait beside the "The person" heading. */
-.about-heading > div {
-  display: grid;
-  grid-template-columns: 176px minmax(0, 1fr);
-  gap: 34px;
-  align-items: center;
-}
-.about-portrait {
-  width: 176px;
-  aspect-ratio: 4 / 5;
-  height: auto;
+/* Round portrait in the hero, between the name line and the greeting. */
+.hero-portrait {
+  display: block;
+  width: 104px;
+  height: 104px;
+  margin: 22px 0 14px;
+  border-radius: 50%;
   object-fit: cover;
-  object-position: 50% 24%;
-  border: 1px solid var(--line);
-  border-radius: 4px;
+  border: 2px solid rgba(188, 234, 203, 0.55);
 }
 .about-heading-copy > h2 {
   margin: 0;
@@ -200,12 +195,10 @@
   text-wrap: pretty;
 }
 @media (max-width: 720px) {
-  .about-heading > div {
-    grid-template-columns: 1fr;
-    gap: 22px;
-  }
-  .about-portrait {
-    width: 132px;
+  .hero-portrait {
+    width: 84px;
+    height: 84px;
+    margin: 18px 0 10px;
   }
 }
 
