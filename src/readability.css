@@ -335,14 +335,11 @@
   color: #fff;
   opacity: 0.82;
 }
-.client-track li img.client-tall {
-  height: 64px;
-}
 .client-track li img {
   display: block;
-  height: 40px;
+  /* Each logo carries its own height, chosen so that wide and compact logos cover about the same area. */
+  height: var(--h, 40px);
   width: auto;
-  max-width: 240px;
   object-fit: contain;
   object-position: left center;
   /* Every logo is shown in one colour so the row matches the page. */
@@ -372,11 +369,7 @@
     font-size: 16px;
   }
   .client-track li img {
-    height: 32px;
-    max-width: 200px;
-  }
-  .client-track li img.client-tall {
-    height: 52px;
+    height: calc(var(--h, 40px) * 0.8);
   }
   .client-logos {
     gap: 26px;
