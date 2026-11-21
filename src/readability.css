@@ -284,7 +284,7 @@
   color: #a9c0b3;
 }
 
-/* Client names scroll across in one continuous row. The list is printed twice so the loop has no gap; the second copy is hidden from screen readers. Hovering pauses it. */
+/* Client logos scroll across in one continuous row. The list is printed twice so the loop has no gap; the second copy is hidden from screen readers. Hovering pauses it. */
 .client-experience > .client-marquee {
   display: flex;
   flex-direction: row;
@@ -318,6 +318,17 @@
   letter-spacing: -0.02em;
   color: #d5e5da;
 }
+.client-track li img {
+  display: block;
+  height: 40px;
+  width: auto;
+  max-width: 240px;
+  object-fit: contain;
+  object-position: left center;
+  /* Every logo is shown in one colour so the row matches the page. */
+  filter: brightness(0) invert(1);
+  opacity: 0.82;
+}
 .client-track li span {
   display: block;
   margin-bottom: 6px;
@@ -339,6 +350,10 @@
   }
   .client-track li {
     font-size: 16px;
+  }
+  .client-track li img {
+    height: 32px;
+    max-width: 200px;
   }
   @keyframes client-scroll {
     to {
